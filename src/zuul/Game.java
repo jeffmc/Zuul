@@ -19,6 +19,7 @@ package zuul;
 class Game 
 {
     private Parser parser;
+    private Level currentLevel;
     private Room currentRoom;
         
     /**
@@ -26,15 +27,16 @@ class Game
      */
     public Game() 
     {
-        createRooms();
+        createDefaultLevel();
         parser = new Parser();
     }
 
     /**
      * Create all the rooms and link their exits together.
      */
-    private void createRooms()
+    private void createDefaultLevel()
     {
+    	currentLevel = new Level();
         Room outside, theatre, pub, lab, office;
       
         // create the rooms
@@ -44,7 +46,7 @@ class Game
         lab = new Room("in a computing lab");
         office = new Room("in the computing admin office");
         
-        // initialise room exits
+        // Initialize room exits
         outside.setExit("east", theatre);
         outside.setExit("south", lab);
         outside.setExit("west", pub);
