@@ -20,12 +20,12 @@ import java.util.StringTokenizer;
  * @version 1.0 (February 2002)
  */
 
-class Parser 
+class CommandParser 
 {
 
     private CommandWords commands;  // holds all valid command words
 
-    public Parser() 
+    public CommandParser() 
     {
         commands = new CommandWords();
     }

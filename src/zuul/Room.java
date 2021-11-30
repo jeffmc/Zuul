@@ -1,7 +1,10 @@
 package zuul;
-import java.util.Set;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Set;
+
+import com.amihaiemil.eoyaml.Yaml;
+import com.amihaiemil.eoyaml.YamlMapping;
 
 /*
  * Class Room - a room in an adventure game.

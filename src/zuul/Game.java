@@ -18,7 +18,7 @@ package zuul;
 
 class Game 
 {
-    private Parser parser;
+    private CommandParser parser;
     private Level currentLevel;
     private Room currentRoom;
         
@@ -28,7 +28,7 @@ class Game
     public Game() 
     {
         createDefaultLevel();
-        parser = new Parser();
+        parser = new CommandParser();
     }
 
     /**
@@ -36,7 +36,7 @@ class Game
      */
     private void createDefaultLevel()
     {
-    	currentLevel = new Level();
+    	currentLevel = new Level("Default level");
         Room outside, theatre, pub, lab, office;
       
         // create the rooms
