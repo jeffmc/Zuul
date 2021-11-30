@@ -22,8 +22,10 @@ import com.amihaiemil.eoyaml.YamlMapping;
 
 class Room
 {
+	private String name; // name of room (used in level saving-loading)
     private String description; // description of the room
     private HashMap<String, Room> exits; // stores exits of this room.
+    private Level level; // The parent level
 
     private byte x, y, width, height; // coordinates and size of the room, defined as a box by top-left corner, utilized only in graphic implementation. Defined as bytes to limit coords from 0-255
     
@@ -32,21 +34,23 @@ class Room
      * "description" is something like "in a kitchen" or "in an open court 
      * yard".
      */
-    public Room(String description, byte x, byte y, byte width, byte height) 
+    public Room(String name, String description, byte x, byte y, byte width, byte height) 
     {
+    	this.name = name;
         this.description = description;
-        exits = new HashMap<String, Room>();
         this.x = x;
         this.y = y;
         this.width = width;
         this.height = height;
+        
+        exits = new HashMap<String, Room>();
     }
 
-   public Room(String description) 
+   public Room(String name, String description) 
    {
-	   this(description,(byte)103,(byte)103,(byte)50,(byte)50); // default coordinates and size (centered and 50x50)
+	   this(name, description,(byte)103,(byte)103,(byte)50,(byte)50); // default coordinates and size (centered and 50x50)
    }
-
+   
     /**
      * Define an exit from this room.
      */
@@ -55,6 +59,14 @@ class Room
         exits.put(direction, neighbor);
     }
 
+    /**
+     * Return the name of the room (the one that was defined in the
+     * constructor).
+     */
+    public String getName() {
+    	return name;
+    }
+    
     /**
      * Return the description of the room (the one that was defined in the
      * constructor).
@@ -95,5 +107,82 @@ class Room
     {
         return (Room)exits.get(direction);
     }
+
+    // Return parent level
+	public Level getLevel() {
+		return level;
+	}
+
+	// Set parent level, should only be called by level.add()
+	public void setLevel(Level level) {
+		this.level = level;
+	}
+
+	// Get X coord
+	public byte getX() {
+		return x;
+	}
+
+	// Set X coord
+	public void setX(byte x) {
+		level.repaint();
+		this.x = x;
+	}
+
+	// Get Y coord
+	public byte getY() {
+		return y;
+	}
+
+	// Set Y coord
+	public void setY(byte y) {
+		level.repaint();
+		this.y = y;
+	}
+
+	// Get width
+	public byte getWidth() {
+		return width;
+	}
+
+	// Set width
+	public void setWidth(byte width) {
+		level.repaint();
+		this.width = width;
+	}
+
+	// Get height
+	public byte getHeight() {
+		return height;
+	}
+
+	// Set height
+	public void setHeight(byte height) {
+		level.repaint();
+		this.height = height;
+	}
+	
+	// Set coordinates (x,y)
+	public void setPosition(byte x, byte y) {
+		this.x = x;
+		this.y = y;
+		level.repaint();
+	}
+	
+	// Set size (width, height)
+	public void setSize(byte width, byte height) {
+		this.width = width;
+		this.height = height;
+		level.repaint();
+	}
+	
+	// Set size and position (x, y, width, height) More efficient for repainting GUI
+	public void setTransform(byte x, byte y, byte width, byte height) {
+		this.x = x;
+		this.y = y;
+		this.width = width;
+		this.height = height;
+		level.repaint();
+	}
 }
 

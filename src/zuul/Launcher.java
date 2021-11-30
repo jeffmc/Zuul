@@ -5,6 +5,7 @@ package zuul;
 
 public class Launcher {
 	public static void main(String args[]) {
+		Level.save(null, null);
 		new Game().play();
 	}
 }

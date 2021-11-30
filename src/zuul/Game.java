@@ -18,17 +18,17 @@ package zuul;
 
 class Game 
 {
-    private CommandParser parser;
+    private CommandParser cmdParser;
     private Level currentLevel;
     private Room currentRoom;
         
     /**
-     * Create the game and initialise its internal map.
+     * Create the game and initialize its internal map.
      */
     public Game() 
     {
         createDefaultLevel();
-        parser = new CommandParser();
+        cmdParser = new CommandParser();
     }
 
     /**
@@ -38,13 +38,15 @@ class Game
     {
     	currentLevel = new Level("Default level");
         Room outside, theatre, pub, lab, office;
-      
+        
         // create the rooms
-        outside = new Room("outside the main entrance of the university");
-        theatre = new Room("in a lecture theatre");
-        pub = new Room("in the campus pub");
-        lab = new Room("in a computing lab");
-        office = new Room("in the computing admin office");
+        outside = new Room("Outside", "outside the main entrance of the university");
+        theatre = new Room("Theatre", "in a lecture theatre");
+        pub = new Room("Pub", "in the campus pub");
+        lab = new Room("Lab", "in a computing lab");
+        office = new Room("Office", "in the computing admin office");
+
+        currentLevel.add(outside,theatre,pub,lab,office);
         
         // Initialize room exits
         outside.setExit("east", theatre);
@@ -75,7 +77,7 @@ class Game
                 
         boolean finished = false;
         while (! finished) {
-            Command command = parser.getCommand();
+            Command command = cmdParser.getCommand();
             finished = processCommand(command);
         }
         System.out.println("Thank you for playing.  Good bye.");
@@ -132,7 +134,7 @@ class Game
         System.out.println("around at the university.");
         System.out.println();
         System.out.println("Your command words are:");
-        parser.showCommands();
+        cmdParser.showCommands();
     }
 
     /** 
