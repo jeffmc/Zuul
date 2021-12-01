@@ -3,8 +3,43 @@ Rooms:
   Outside:
     Description: outside the main entrance of the university
     Exits:
+      east: Theatre
+      south: Lab
+      west: Pub
+    X: 240
+    Y: 103
+    Width: 50
+    Height: 50
+  Theatre:
+    Description: in a lecture theatre
+    Exits:
+      west: Outside
+    X: 240
+    Y: 103
+    Width: 50
+    Height: 50
+  Pub:
+    Description: in the campus pub
+    Exits:
+      east: Outside
+    X: 240
+    Y: 103
+    Width: 50
+    Height: 50
+  Lab:
+    Description: in a computing lab
+    Exits:
+      east: Office
+      north: Outside
+    X: 76
+    Y: 103
+    Width: 50
+    Height: 50
+  Office:
+    Description: in the computing admin office
+    Exits:
       west: Lab
-    X: 103
+    X: 240
     Y: 103
     Width: 50
     Height: 50

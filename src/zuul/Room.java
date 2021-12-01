@@ -1,10 +1,8 @@
 package zuul;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
-
-import com.amihaiemil.eoyaml.Yaml;
-import com.amihaiemil.eoyaml.YamlMapping;
 
 /*
  * Class Room - a room in an adventure game.
@@ -26,18 +24,17 @@ class Room
 	private String name; // name of room (used in level saving-loading)
     private String description; // description of the room
     private HashMap<String, Room> exits; // stores exits of this room.
-    private byte x, y, width, height; // coordinates and size of the room, defined as a box by top-left corner, utilized only in graphic implementation. Defined as bytes to limit coords from 0-255
+    private int x, y, width, height; // coordinates and size of the room, defined as a box by top-left corner.
     
     // Not-serialized
     private Level level; // The parent level
-    
     
     /**
      * Create a room described "description". Initially, it has no exits.
      * "description" is something like "in a kitchen" or "in an open court 
      * yard".
      */
-    public Room(String name, String description, byte x, byte y, byte width, byte height) 
+    public Room(String name, String description, int x, int y, int width, int height) 
     {
     	this.name = name;
         this.description = description;
@@ -51,56 +48,60 @@ class Room
 
    public Room(String name, String description) 
    {
-	   this(name, description,(byte)103,(byte)103,(byte)50,(byte)50); // default coordinates and size (centered and 50x50)
+	   this(name, description,240,103,50,50); // default coordinates and size (centered and 50x50)
    }
    
-    /**
-     * Define an exit from this room.
-     */
-    public void setExit(String direction, Room neighbor) 
-    {
-        exits.put(direction, neighbor);
-    }
+   private void repaint() {
+	   level.repaint();
+   }
+   
+	/**
+	 * Define an exit from this room.
+	 */
+	public void setExit(String direction, Room neighbor) 
+	{
+	    exits.put(direction, neighbor);
+	}
 
-    /**
-     * Return the name of the room (the one that was defined in the
-     * constructor).
-     */
-    public String getName() {
-    	return name;
-    }
+	/**
+	 * Return the name of the room (the one that was defined in the
+	 * constructor).
+	 */
+	public String getName() {
+		return name;
+	}
     
-    /**
-     * Return the description of the room (the one that was defined in the
-     * constructor).
-     */
-    public String getShortDescription()
-    {
-        return description;
+	/**
+	 * Return the description of the room (the one that was defined in the
+	 * constructor).
+	 */
+	public String getShortDescription()
+	{
+	    return description;
+	}
+
+	/**
+	 * Return a long description of this room, in the form:
+	 *     You are in the kitchen.
+	 *     Exits: north west
+	 */
+	public String getLongDescription()
+	{
+	    return "You are " + description + ".\n" + getExitString();
     }
 
-    /**
-     * Return a long description of this room, in the form:
-     *     You are in the kitchen.
-     *     Exits: north west
-     */
-    public String getLongDescription()
-    {
-        return "You are " + description + ".\n" + getExitString();
-    }
-
-    /**
-     * Return a string describing the room's exits, for example
-     * "Exits: north west".
-     */
-    private String getExitString()
-    {
-        String returnString = "Exits:";
-        Set<String> keys = exits.keySet();
-        for(Iterator<String> iter = keys.iterator(); iter.hasNext(); )
-            returnString += " " + iter.next();
-        return returnString;
-    }
+	/**
+	 * Return a string describing the room's exits, for example
+	 * "Exits: north west".
+	 */
+	private String getExitString()
+	{
+	    String returnString = "Exits:";
+	    Set<String> keys = exits.keySet();
+	    for(Iterator<String> iter = keys.iterator(); iter.hasNext(); )
+	        returnString += " " + iter.next();
+	    return returnString;
+	}
 
     /**
      * Return the room that is reached if we go from this room in direction
@@ -111,6 +112,10 @@ class Room
         return (Room)exits.get(direction);
     }
 
+    public Map<String, Room> getExits() {
+    	return exits;
+    }
+    
     // Return parent level
 	public Level getLevel() {
 		return level;
@@ -119,73 +124,74 @@ class Room
 	// Set parent level, should only be called by level.add()
 	public void setLevel(Level level) {
 		this.level = level;
+		repaint();
 	}
 
 	// Get X coord
-	public byte getX() {
+	public int getX() {
 		return x;
 	}
 
 	// Set X coord
-	public void setX(byte x) {
-		level.repaint();
+	public void setX(int x) {
+		repaint();
 		this.x = x;
 	}
 
 	// Get Y coord
-	public byte getY() {
+	public int getY() {
 		return y;
 	}
 
 	// Set Y coord
-	public void setY(byte y) {
-		level.repaint();
+	public void setY(int y) {
+		repaint();
 		this.y = y;
 	}
 
 	// Get width
-	public byte getWidth() {
+	public int getWidth() {
 		return width;
 	}
 
 	// Set width
-	public void setWidth(byte width) {
-		level.repaint();
+	public void setWidth(int width) {
+		repaint();
 		this.width = width;
 	}
 
 	// Get height
-	public byte getHeight() {
+	public int getHeight() {
 		return height;
 	}
 
 	// Set height
-	public void setHeight(byte height) {
-		level.repaint();
+	public void setHeight(int height) {
+		repaint();
 		this.height = height;
 	}
 	
 	// Set coordinates (x,y)
-	public void setPosition(byte x, byte y) {
+	public void setPosition(int x, int y) {
 		this.x = x;
 		this.y = y;
-		level.repaint();
+		repaint();
 	}
 	
 	// Set size (width, height)
-	public void setSize(byte width, byte height) {
+	public void setSize(int width, int height) {
 		this.width = width;
 		this.height = height;
-		level.repaint();
+		repaint();
 	}
 	
 	// Set size and position (x, y, width, height) More efficient for repainting GUI
-	public void setTransform(byte x, byte y, byte width, byte height) {
+	public void setTransform(int x, int y, int width, int height) {
 		this.x = x;
 		this.y = y;
 		this.width = width;
 		this.height = height;
-		level.repaint();
+		repaint();
 	}
 }
 

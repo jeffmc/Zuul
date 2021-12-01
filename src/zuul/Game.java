@@ -1,7 +1,5 @@
 package zuul;
 
-import java.io.File;
-
 /**
  *  This class is the main class of the "World of Zuul" application. 
  *  "World of Zuul" is a very simple, text based adventure game.  Users 
@@ -25,53 +23,17 @@ class Game
     private Level currentLevel;
     private Room currentRoom;
         
-    private final String NORTH = "north", EAST = "east", SOUTH = "south", WEST = "west";
+    public static final String NORTH = "north", EAST = "east", SOUTH = "south", WEST = "west";
     
     /**
      * Create the game and initialize its internal map.
      */
-    public Game() 
+    public Game(Level level) 
     {
-        createDefaultLevel();
-		Level.save(currentLevel, new File(currentLevel.getName() + ".yaml"));
-		
+    	this.currentLevel = level;
         cmdParser = new CommandParser();
     }
-
-    /**
-     * Create all the rooms and link their exits together.
-     */
-    private void createDefaultLevel()
-    {
-    	currentLevel = new Level("Genesis");
-        Room outside, theatre, pub, lab, office;
-        
-        // create the rooms
-        outside = new Room("Outside", "outside the main entrance of the university");
-        theatre = new Room("Theatre", "in a lecture theatre");
-        pub = new Room("Pub", "in the campus pub");
-        lab = new Room("Lab", "in a computing lab");
-        office = new Room("Office", "in the computing admin office");
-
-        currentLevel.add(outside,theatre,pub,lab,office);
-        currentLevel.setSpawn(outside);
-        
-        // Initialize room exits
-        outside.setExit(EAST, theatre);
-        outside.setExit(SOUTH, lab);
-        outside.setExit(WEST, pub);
-
-        theatre.setExit(WEST, outside);
-
-        pub.setExit(EAST, outside);
-
-        lab.setExit(NORTH, outside);
-        lab.setExit(EAST, office);
-
-        office.setExit(WEST, lab);
-        
-    }
-
+    
     /**
      *  Main play routine.  Loops until end of play.
      */
