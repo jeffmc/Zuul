@@ -15,10 +15,10 @@ public class Launcher {
 		
 		try {
 			Level l = LevelManager.load(new File("ReadOnly.yaml"));
+			LevelManager.save(l);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-//		Level.save(l);
 		
 		
 		editor = new Editor();

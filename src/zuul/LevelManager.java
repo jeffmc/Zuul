@@ -3,12 +3,15 @@ package zuul;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlInput;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.amihaiemil.eoyaml.YamlMappingBuilder;
+import com.amihaiemil.eoyaml.YamlNode;
 import com.amihaiemil.eoyaml.YamlPrinter;
 
 public class LevelManager {
@@ -62,10 +65,33 @@ public class LevelManager {
 	public static Level load(File f) throws IOException {
 		YamlInput in = Yaml.createYamlInput(f);
 		YamlMapping root = in.readYamlMapping();
-		Level l = new Level(root.string("Level"), false);
-    	
-		
-		l.completedLoading();
-		return l;
+		Level level = new Level(root.string("Level"), false);
+    	YamlMapping rooms = root.yamlMapping("Rooms");
+    	Map<Room, YamlMapping> exitMapping = new HashMap<>();
+    	for (YamlNode k : rooms.keys()) {
+    		YamlMapping r = rooms.yamlMapping(k);
+    		Room room = new Room(
+    				k.asScalar().value(),
+    				r.string("Description"),
+    				r.integer("X"),
+    				r.integer("Y"),
+    				r.integer("Width"),
+    				r.integer("Height")
+				);
+    		level.add(room);
+    		exitMapping.put(room, r.yamlMapping("Exits"));
+    	}
+    	for (Entry<Room, YamlMapping> e : exitMapping.entrySet()) {
+    		Room room = e.getKey();
+    		YamlMapping exits = e.getValue();
+        	for (YamlNode d : exits.keys()) {
+        		String roomName = exits.string(d);
+        		Room exitRoom = level.getRoom(roomName);
+        		if (exitRoom == null) throw new IOException("Invalid exit for '" + room.getName() + "': '" + roomName + "'!");
+        		room.setExit(d.asScalar().value(), exitRoom);
+        	}
+    	}
+		level.completedLoading();
+		return level;
     }
 }

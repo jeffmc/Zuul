@@ -76,4 +76,10 @@ public class Level {
 		return rooms;
 	}
     
+    public Room getRoom(String name) {
+    	for (Room r : rooms) 
+    		if (r.getName().equals(name)) return r;
+    	return null;
+    }
+    
 }

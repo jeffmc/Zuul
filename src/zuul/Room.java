@@ -60,7 +60,11 @@ class Room
 	 */
 	public void setExit(String direction, Room neighbor) 
 	{
-	    exits.put(direction, neighbor);
+		if (level == neighbor.getLevel()) {
+			exits.put(direction, neighbor);
+		} else {
+			throw new IllegalArgumentException("Desired neighbor rooms not in same level!");
+		}
 	}
 
 	/**
