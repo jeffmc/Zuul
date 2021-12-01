@@ -1,17 +1,7 @@
 package zuul;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map.Entry;
-
-import com.amihaiemil.eoyaml.Yaml;
-import com.amihaiemil.eoyaml.YamlInput;
-import com.amihaiemil.eoyaml.YamlMapping;
-import com.amihaiemil.eoyaml.YamlMappingBuilder;
-import com.amihaiemil.eoyaml.YamlPrinter;
 
 public class Level {
 	// Serialized

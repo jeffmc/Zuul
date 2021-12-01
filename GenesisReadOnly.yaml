@@ -1,4 +1,5 @@
-Level: GenesisFullLoop
+LevelName: GenesisSaved
+Spawn: Outside
 Rooms:
   Outside:
     Description: outside the main entrance of the university
@@ -6,24 +7,24 @@ Rooms:
       east: Theatre
       south: Lab
       west: Pub
-    X: 240
-    Y: 103
+    X: 200
+    Y: 200
     Width: 50
     Height: 50
   Theatre:
     Description: in a lecture theatre
     Exits:
       west: Outside
-    X: 240
-    Y: 103
+    X: 260
+    Y: 200
     Width: 50
     Height: 50
   Pub:
     Description: in the campus pub
     Exits:
       east: Outside
-    X: 240
-    Y: 103
+    X: 140
+    Y: 200
     Width: 50
     Height: 50
   Lab:
@@ -31,15 +32,15 @@ Rooms:
     Exits:
       east: Office
       north: Outside
-    X: 76
-    Y: 103
+    X: 200
+    Y: 260
     Width: 50
     Height: 50
   Office:
     Description: in the computing admin office
     Exits:
       west: Lab
-    X: 240
-    Y: 103
+    X: 260
+    Y: 260
     Width: 50
     Height: 50

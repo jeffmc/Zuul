@@ -12,7 +12,8 @@ import javax.swing.JFrame;
 public class Editor {
 	private JFrame frame;
 	
-	private Level currentLevel;
+	private Level activeLevel;
+	private LevelCanvas lc;
 	
 	private static final int EDITOR_SIZE = 768;
 	
@@ -34,7 +35,7 @@ public class Editor {
 		lcc.gridwidth = 3;
 		lcc.gridheight = 3;
 		lcc.insets = pdg;
-		LevelCanvas lc = new LevelCanvas(new Dimension(EDITOR_SIZE,EDITOR_SIZE), Color.BLACK);
+		lc = new LevelCanvas(new Dimension(EDITOR_SIZE,EDITOR_SIZE), Color.BLACK);
 		frame.add(lc, lcc);
 		
 		GridBagConstraints jbc = new GridBagConstraints();
@@ -51,5 +52,14 @@ public class Editor {
 	public void start() {
 		frame.setLocationRelativeTo(null);
 		frame.setVisible(true);
+	}
+	
+	public void setActiveLevel(Level l) {
+		lc.setActiveLevel(l);
+		activeLevel = l;
+	}
+	
+	public Level getActiveLevel() {
+		return activeLevel;
 	}
 }

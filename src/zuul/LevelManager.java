@@ -16,12 +16,12 @@ import com.amihaiemil.eoyaml.YamlPrinter;
 
 public class LevelManager {
 
-	
 	// https://github.com/decorators-squad/eo-yaml/wiki/Block-Style-YAML
     public static void save(Level l, File f) {
     	// Create level mapping
     	YamlMappingBuilder level = Yaml.createYamlMappingBuilder()
-    		    .add("Level", l.getName());
+    		    .add("LevelName", l.getName())
+    		    .add("Spawn", l.getSpawn().getName());
     	
     	// Create rooms mapping
     	YamlMappingBuilder rooms = Yaml.createYamlMappingBuilder();
@@ -63,9 +63,14 @@ public class LevelManager {
     }
 
 	public static Level load(File f) throws IOException {
+		// Setup Yaml input
 		YamlInput in = Yaml.createYamlInput(f);
 		YamlMapping root = in.readYamlMapping();
-		Level level = new Level(root.string("Level"), false);
+		
+		// Make level object
+		Level level = new Level(root.string("LevelName"), false);
+		
+		// Parse rooms into the level as Room objects and into exitMapping to be parsed later
     	YamlMapping rooms = root.yamlMapping("Rooms");
     	Map<Room, YamlMapping> exitMapping = new HashMap<>();
     	for (YamlNode k : rooms.keys()) {
@@ -81,6 +86,11 @@ public class LevelManager {
     		level.add(room);
     		exitMapping.put(room, r.yamlMapping("Exits"));
     	}
+    	
+    	// Set spawn by finding in level via name.
+    	level.setSpawn(level.getRoom(root.string("Spawn")));
+    	
+    	// Parse through exit mappings and apply to Room objects in level
     	for (Entry<Room, YamlMapping> e : exitMapping.entrySet()) {
     		Room room = e.getKey();
     		YamlMapping exits = e.getValue();

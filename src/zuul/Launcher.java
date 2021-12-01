@@ -12,22 +12,20 @@ public class Launcher {
 	private static Game instance;
 	
 	public static void main(String args[]) {
-		
+		editor = new Editor();
+		editor.start();
 		try {
-			Level l = LevelManager.load(new File("ReadOnly.yaml"));
+			Level l = LevelManager.load(new File("GenesisReadOnly.yaml"));
+			editor.setActiveLevel(l);
+			instance = new Game(l);
+			instance.play();
 			LevelManager.save(l);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
-		
-		editor = new Editor();
-		editor.start();
-//		instance = new Game(l);
-//		instance.play();
 	}
 	
-
+	@Deprecated
     private static Level createDefaultLevel()
     {
     	Level l = new Level("Genesis", false);

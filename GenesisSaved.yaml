@@ -1,4 +1,5 @@
-Level: GenesisFullLoop
+LevelName: GenesisSaved
+Spawn: Outside
 Rooms:
   Outside:
     Description: outside the main entrance of the university

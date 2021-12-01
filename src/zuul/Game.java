@@ -20,7 +20,7 @@ package zuul;
 class Game 
 {
     private CommandParser cmdParser;
-    private Level currentLevel;
+    private Level level;
     private Room currentRoom;
         
     public static final String NORTH = "north", EAST = "east", SOUTH = "south", WEST = "west";
@@ -30,7 +30,7 @@ class Game
      */
     public Game(Level level) 
     {
-    	this.currentLevel = level;
+    	this.level = level;
         cmdParser = new CommandParser();
     }
     
@@ -40,7 +40,7 @@ class Game
     public void play() 
     {            
 
-        currentRoom = currentLevel.getSpawn();  // start game outside
+        currentRoom = level.getSpawn();  // start game outside
         printWelcome();
 
         // Enter the main command loop.  Here we repeatedly read commands and
