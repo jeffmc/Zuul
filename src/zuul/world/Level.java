@@ -1,7 +1,9 @@
 package zuul.world;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import zuul.util.Signal;
 
@@ -14,13 +16,15 @@ public class Level {
 	// Not serialized
 	private Signal repaintSignal;
     private boolean loadingComplete; // Do not trigger repaints while this is true
+    private Set<Path> paths;
 	
 	public Level(String name, boolean loadingComplete) {
 		this.name = name;
 		rooms = new ArrayList<Room>();
+		paths = new HashSet<Path>();
 		
 		this.loadingComplete = loadingComplete;
-		repaintSignal = new Signal("Level repaint: " + name);
+		repaintSignal = new Signal("Level repaint: " + name, false);
 	}
 
 	public Level(String name) {
@@ -72,6 +76,14 @@ public class Level {
     	for (Room r : rooms) 
     		if (r.getName().equals(name)) return r;
     	return null;
+    }
+    
+    public void add(Path p) {
+    	paths.add(p);
+    }
+    
+    public Set<Path> getPaths() {
+    	return paths;
     }
     
 }

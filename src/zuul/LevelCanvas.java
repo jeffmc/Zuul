@@ -7,7 +7,9 @@ import java.awt.Graphics;
 import java.awt.Rectangle;
 
 import zuul.world.Level;
+import zuul.world.Path;
 import zuul.world.Room;
+import zuul.world.TwoWayPath;
 
 @SuppressWarnings("serial")
 public class LevelCanvas extends Canvas {
@@ -30,31 +32,43 @@ public class LevelCanvas extends Canvas {
 	
 	@Override
 	public void paint(Graphics g) {
+		// Fill background with background color specified in constructor.
 		g.setColor(bg);
-		Rectangle rect = g.getClipBounds();
-		g.fillRect(rect.x, rect.y, rect.width, rect.height);
+		Rectangle size = g.getClipBounds();
+		g.fillRect(size.x, size.y, size.width, size.height);
+
+		// Draw 4x4 white rect at center of board
+		g.setColor(Color.white);
+		g.fillRect(size.width/2-2, size.height/2-2, 4, 4);
+		
 		if (level != null) {
-			for (Room room : level.getRooms()) {
-				int rx = room.getX(), ry = room.getY(), rw = room.getWidth(), rh = room.getHeight();
-				
-				// Draw rect
-				g.setColor(Color.RED);
-				g.drawRect(rx, ry, rw, rh);
-				
-				// Draw label
-				g.setColor(Color.YELLOW);
-				g.drawString(room.getName(), rx, ry);
-				
-				// Connect exits
-				g.setColor(Color.GREEN);
-				int rcx = rx + rw/2, rcy = ry + rh/2;
-				for (Room exit : room.getExits().values()) { // TODO: Don't draw all lines twice
-					int ex = exit.getX(), ey = exit.getY(), ew = exit.getWidth(), eh = exit.getHeight();
-					int ecx = ex + ew/2, ecy = ey + eh/2;
-					g.drawLine(rcx, rcy, ecx, ecy);
-				}
+			// Center canvas at spawn room's center
+			Room s = level.getSpawn();
+			centerAt(g, s.getX()+s.getWidth()/2,s.getY()+s.getHeight()/2);
+
+			// Draw paths
+			for (Path p : level.getPaths()) {
+				g.setColor(p instanceof TwoWayPath?Color.GREEN:Color.YELLOW);
+				Room a = p.getA(), b = p.getB();
+				g.drawLine(a.getX()+a.getWidth()/2, a.getY()+a.getHeight()/2,
+						b.getX()+b.getWidth()/2, b.getY()+b.getHeight()/2);
+			}
+			
+			// Draw rooms
+			for (Room r : level.getRooms()) {
+				int rx = r.getX(), ry = r.getY();
+				// Draw room rectangle and label
+				g.setColor(r.isSpawnpoint()?Color.MAGENTA:Color.BLUE);
+				g.drawRect(rx, ry, r.getWidth(), r.getHeight());
+				g.setColor(r.isSpawnpoint()?Color.PINK:Color.CYAN);
+				g.drawString(r.getName(), rx, ry);
 			}
 		}
+	}
+
+	private void centerAt(Graphics g, int scx, int scy) {
+		g.translate(-scx+this.getWidth()/2,-scy+this.getHeight()/2);
+		
 	}
 
 	public void setActiveLevel(Level l) {

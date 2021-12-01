@@ -1,7 +1,10 @@
 package zuul.world;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 /*
@@ -26,7 +29,9 @@ public class Room {
     private int x, y, width, height; // coordinates and size of the room, defined as a box by top-left corner.
     
     // Not-serialized
+    private boolean isSpawn;
     private Level level; // The parent level
+    private Set<Path> paths; // Contains connections to neighbors
     
     /**
      * Create a room described "description". Initially, it has no exits.
@@ -42,7 +47,9 @@ public class Room {
         this.width = width;
         this.height = height;
         
+        isSpawn = false;
         exits = new HashMap<String, Room>();
+        paths = new HashSet<Path>();
     }
 
    public Room(String name, String description) 
@@ -64,6 +71,42 @@ public class Room {
 		} else {
 			throw new IllegalArgumentException("Desired neighbor rooms not in same level!");
 		}
+	}
+
+	public void calcPaths() {
+		for (Entry<String, Room> e : exits.entrySet()) {
+			Room n = e.getValue(); // neighbor
+			if (!(n.hasPathTo(this)||hasPathTo(n))) {
+				// Get neighbor path name
+				String neighborPathName = null;
+				for (Entry<String, Room> d : n.getExits().entrySet())
+					if (d.getValue()==this) neighborPathName = d.getKey();
+				if (neighborPathName == null) {
+					// One-way path
+					System.out.println("MADE ONE WAY PATH: " + getName() + "->" + n.getName());
+					Path p = new OneWayPath(this, n, e.getKey(), null, true);
+					addPath(p);
+					n.addPath(p);
+					level.add(p);
+				} else {
+					// Two-way path
+					Path p = new TwoWayPath(this, n, e.getKey(), neighborPathName);
+					addPath(p);
+					n.addPath(p);
+					level.add(p);
+				}
+			} else {
+				System.out.println("Path creation averted");
+			}
+		}
+	}
+	
+	// Has path to, not necessarily access to.
+	private boolean hasPathTo(Room target) {
+		for (Path p : paths) 
+			if ((p.getA()==this&&p.getB()==target) ||
+					(p.getA()==target&&p.getB()==this)) return true;
+		return false;
 	}
 
 	/**
@@ -195,6 +238,22 @@ public class Room {
 		this.width = width;
 		this.height = height;
 		repaint();
+	}
+	
+	private void addPath(Path p) {
+		paths.add(p);
+	}
+	
+	public Set<Path> getPaths() {
+		return paths;
+	}
+
+	public boolean isSpawnpoint() {
+		return isSpawn;
+	}
+
+	public void updateSpawnStatus() {
+		isSpawn = level.getSpawn()==this;
 	}
 }
 

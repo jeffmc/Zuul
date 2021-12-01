@@ -6,14 +6,16 @@ import java.util.List;
 public class Signal {
 	private List<Runnable> listeners;
 	private String debugLabel;
+	private boolean debugLog;
 	
-	public Signal(String debugLabel) {
+	public Signal(String debugLabel, boolean debugLog) {
 		listeners = new ArrayList<>();
 		this.debugLabel = debugLabel;
+		this.debugLog = debugLog;
 	}
 	
 	public Signal() {
-		this(null);
+		this(null, false);
 	}
 	
 	public void addListener(Runnable r) {
@@ -25,7 +27,7 @@ public class Signal {
 	}
 	
 	public void run() {
-		if (debugLabel != null && debugLabel.length() > 0) System.err.println(debugLabel);
+		if (debugLog && debugLabel != null && debugLabel.length() > 0) System.err.println(debugLabel);
 		for (Runnable r : listeners) {
 			r.run();
 		}

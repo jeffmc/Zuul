@@ -10,8 +10,7 @@ package zuul.cmd;
  * @version 1.0 (February 2002)
  */
 
-class CommandWords
-{
+public class CommandWords {
     // a constant array that holds all valid command words
     private static final String validCommands[] = {
         "go", "quit", "help"

@@ -40,7 +40,20 @@ Rooms:
     Description: in the computing admin office
     Exits:
       west: Lab
+      tunnel: Theatre
+      ladder: Outside
+      lock: Vault
     X: 260
     Y: 260
     Width: 50
     Height: 50
+  Vault:
+    Description: where the money is at
+    Exits:
+      door: Office
+      hatch: Pub
+    X: 320
+    Y: 260
+    Width: 30
+    Height: 30
+    

@@ -91,7 +91,9 @@ public class LevelManager {
     	}
     	
     	// Set spawn by finding in level via name.
-    	level.setSpawn(level.getRoom(root.string("Spawn")));
+    	Room spawnRoom = level.getRoom(root.string("Spawn"));
+    	level.setSpawn(spawnRoom);
+    	spawnRoom.updateSpawnStatus();
     	
     	// Parse through exit mappings and apply to Room objects in level
     	for (Entry<Room, YamlMapping> e : exitMapping.entrySet()) {
@@ -104,6 +106,9 @@ public class LevelManager {
         		room.setExit(d.asScalar().value(), exitRoom);
         	}
     	}
+    	for (Room r : level.getRooms())
+			r.calcPaths();
+    	System.out.println(level.getPaths().size() + " total paths!");
 		level.completedLoading();
 		return level;
     }

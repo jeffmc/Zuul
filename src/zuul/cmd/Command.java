@@ -18,8 +18,9 @@ package zuul.cmd;
  * @version 1.0 (February 2002)
  */
 
-class Command
-{
+
+// TODO: Refactor entire command system
+public class Command {
     private String commandWord;
     private String secondWord;
 
