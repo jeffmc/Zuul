@@ -1,10 +1,15 @@
 package zuul;
 
-import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+
+import javax.swing.JPanel;
 
 import zuul.world.Level;
 import zuul.world.Path;
@@ -12,26 +17,95 @@ import zuul.world.Room;
 import zuul.world.TwoWayPath;
 
 @SuppressWarnings("serial")
-public class LevelCanvas extends Canvas {
+public class LevelCanvas extends JPanel {
 
 	private Color bg;
 	private Level level;
+	private int cameraX, cameraY;
+	private int lastCameraX, lastCameraY;
+	
+	private Point endDrag;
+	private Point startDrag;
 	
 	public LevelCanvas(Level level, Dimension size, Color background) {
 		super();
-		this.level = level;
 		bg = background;
 		this.setMinimumSize(size);
 		this.setPreferredSize(size);
 		this.setMaximumSize(size);
+		setActiveLevel(level);
+		addMouseMotionListener(new MouseMotionListener() {
+			
+			@Override
+			public void mouseMoved(MouseEvent e) {
+				
+			}
+			
+			@Override
+			public void mouseDragged(MouseEvent e) {
+				System.out.println("HERE");
+				Point nowDrag = e.getLocationOnScreen();
+				Point delta = new Point(startDrag);
+				delta.x -= nowDrag.x;
+				delta.y -= nowDrag.y;
+				cameraX = lastCameraX + delta.x;
+				cameraY = lastCameraY + delta.y;
+				repaint();
+			}
+		});
+		addMouseListener(new MouseListener() {
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				if (e.getButton()==MouseEvent.BUTTON2) {
+					endDrag = e.getLocationOnScreen();
+					Point delta = new Point(startDrag);
+					delta.x -= endDrag.x;
+					delta.y -= endDrag.y;
+					cameraX = lastCameraX + delta.x;
+					cameraY = lastCameraY + delta.y;
+					repaint();
+				}
+			}
+			
+			@Override
+			public void mousePressed(MouseEvent e) {
+				if (e.getButton()==MouseEvent.BUTTON2) {
+					lastCameraX = cameraX;
+					lastCameraY = cameraY;
+					startDrag = e.getLocationOnScreen();
+				}
+			}
+			
+			@Override
+			public void mouseExited(MouseEvent e) { 
+				
+			}
+			
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				
+			}
+			
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				
+			}
+		});
 	}
 	
 	public LevelCanvas(Dimension size, Color background) {
 		this(null, size, background);
 	}
 	
+	public void changeCameraPosition(int dx, int dy) {
+		cameraX += dx;
+		cameraY += dy;
+	}
+	
 	@Override
-	public void paint(Graphics g) {
+	public void paintComponent(Graphics g) {
+		super.paintComponent(g);
+		// TODO: Add scaling
 		// Fill background with background color specified in constructor.
 		g.setColor(bg);
 		Rectangle size = g.getClipBounds();
@@ -42,9 +116,8 @@ public class LevelCanvas extends Canvas {
 		g.fillRect(size.width/2-2, size.height/2-2, 4, 4);
 		
 		if (level != null) {
-			// Center canvas at spawn room's center
-			Room s = level.getSpawn();
-			centerAt(g, s.getX()+s.getWidth()/2,s.getY()+s.getHeight()/2);
+			// Center canvas at camera coords
+			centerAt(g, cameraX, cameraY);
 
 			// Draw paths
 			for (Path p : level.getPaths()) {
@@ -66,13 +139,21 @@ public class LevelCanvas extends Canvas {
 		}
 	}
 
-	private void centerAt(Graphics g, int scx, int scy) {
-		g.translate(-scx+this.getWidth()/2,-scy+this.getHeight()/2);
+	private void centerAt(Graphics g, int centerX, int centerY) {
+		g.translate(-centerX+this.getWidth()/2,-centerY+this.getHeight()/2);
 		
 	}
 
 	public void setActiveLevel(Level l) {
 		level = l;
+		if (l != null) {
+			Room s = level.getSpawn();
+			cameraX = s.getX()+s.getWidth()/2;
+			cameraY = s.getY()+s.getHeight()/2;
+		} else {
+			cameraX = 0;
+			cameraY = 0;
+		}
 		repaint();
 	}
 	
