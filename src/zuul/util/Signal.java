@@ -1,4 +1,4 @@
-package zuul;
+package zuul.util;
 
 import java.util.ArrayList;
 import java.util.List;

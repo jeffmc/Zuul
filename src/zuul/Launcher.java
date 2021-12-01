@@ -3,6 +3,10 @@ package zuul;
 import java.io.File;
 import java.io.IOException;
 
+import zuul.util.LevelManager;
+import zuul.world.Level;
+import zuul.world.Room;
+
 // For repository viewers: https://github.com/decorators-squad/eo-yaml/releases/tag/6.0.0
 // This release of YAML library was put into the libSrc folder.
 

@@ -9,6 +9,8 @@ import java.awt.Insets;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 
+import zuul.world.Level;
+
 public class Editor {
 	private JFrame frame;
 	

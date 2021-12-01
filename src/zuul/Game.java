@@ -1,5 +1,10 @@
 package zuul;
 
+import zuul.cmd.Command;
+import zuul.cmd.CommandParser;
+import zuul.world.Level;
+import zuul.world.Room;
+
 /**
  *  This class is the main class of the "World of Zuul" application. 
  *  "World of Zuul" is a very simple, text based adventure game.  Users 

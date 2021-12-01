@@ -1,7 +1,9 @@
-package zuul;
+package zuul.world;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import zuul.util.Signal;
 
 public class Level {
 	// Serialized

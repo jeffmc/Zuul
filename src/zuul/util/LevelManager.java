@@ -1,4 +1,4 @@
-package zuul;
+package zuul.util;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -13,6 +13,9 @@ import com.amihaiemil.eoyaml.YamlMapping;
 import com.amihaiemil.eoyaml.YamlMappingBuilder;
 import com.amihaiemil.eoyaml.YamlNode;
 import com.amihaiemil.eoyaml.YamlPrinter;
+
+import zuul.world.Level;
+import zuul.world.Room;
 
 public class LevelManager {
 

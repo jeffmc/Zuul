@@ -1,4 +1,4 @@
-package zuul;
+package zuul.cmd;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.StringTokenizer;
@@ -20,8 +20,7 @@ import java.util.StringTokenizer;
  * @version 1.0 (February 2002)
  */
 
-class CommandParser 
-{
+public class CommandParser {
 
     private CommandWords commands;  // holds all valid command words
 

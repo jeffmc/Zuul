@@ -1,4 +1,4 @@
-package zuul;
+package zuul.world;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -18,8 +18,7 @@ import java.util.Set;
  * @version 1.0 (February 2002)
  */
 
-class Room
-{
+public class Room {
 	// Serialized
 	private String name; // name of room (used in level saving-loading)
     private String description; // description of the room

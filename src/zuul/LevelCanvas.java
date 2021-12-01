@@ -6,6 +6,9 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Rectangle;
 
+import zuul.world.Level;
+import zuul.world.Room;
+
 @SuppressWarnings("serial")
 public class LevelCanvas extends Canvas {
 
