@@ -22,12 +22,15 @@ import com.amihaiemil.eoyaml.YamlMapping;
 
 class Room
 {
+	// Serialized
 	private String name; // name of room (used in level saving-loading)
     private String description; // description of the room
     private HashMap<String, Room> exits; // stores exits of this room.
-    private Level level; // The parent level
-
     private byte x, y, width, height; // coordinates and size of the room, defined as a box by top-left corner, utilized only in graphic implementation. Defined as bytes to limit coords from 0-255
+    
+    // Not-serialized
+    private Level level; // The parent level
+    
     
     /**
      * Create a room described "description". Initially, it has no exits.

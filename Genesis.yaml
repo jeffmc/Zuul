@@ -1,0 +1,10 @@
+Level: Genesis
+Rooms:
+  Outside:
+    Description: outside the main entrance of the university
+    Exits:
+      west: Lab
+    X: 103
+    Y: 103
+    Width: 50
+    Height: 50

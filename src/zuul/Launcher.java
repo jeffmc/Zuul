@@ -4,8 +4,11 @@ package zuul;
 // This release of YAML library was put into the libSrc folder.
 
 public class Launcher {
+	
+	private static Game instance;
+	
 	public static void main(String args[]) {
-		Level.save(null, null);
-		new Game().play();
+		instance = new Game();
+//		instance.play();
 	}
 }

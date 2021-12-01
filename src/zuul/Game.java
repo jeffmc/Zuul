@@ -1,4 +1,7 @@
 package zuul;
+
+import java.io.File;
+
 /**
  *  This class is the main class of the "World of Zuul" application. 
  *  "World of Zuul" is a very simple, text based adventure game.  Users 
@@ -22,12 +25,16 @@ class Game
     private Level currentLevel;
     private Room currentRoom;
         
+    private final String NORTH = "north", EAST = "east", SOUTH = "south", WEST = "west";
+    
     /**
      * Create the game and initialize its internal map.
      */
     public Game() 
     {
         createDefaultLevel();
+		Level.save(currentLevel, new File(currentLevel.getName() + ".yaml"));
+		
         cmdParser = new CommandParser();
     }
 
@@ -36,7 +43,7 @@ class Game
      */
     private void createDefaultLevel()
     {
-    	currentLevel = new Level("Default level");
+    	currentLevel = new Level("Genesis");
         Room outside, theatre, pub, lab, office;
         
         // create the rooms
@@ -47,22 +54,22 @@ class Game
         office = new Room("Office", "in the computing admin office");
 
         currentLevel.add(outside,theatre,pub,lab,office);
+        currentLevel.setSpawn(outside);
         
         // Initialize room exits
-        outside.setExit("east", theatre);
-        outside.setExit("south", lab);
-        outside.setExit("west", pub);
+        outside.setExit(EAST, theatre);
+        outside.setExit(SOUTH, lab);
+        outside.setExit(WEST, pub);
 
-        theatre.setExit("west", outside);
+        theatre.setExit(WEST, outside);
 
-        pub.setExit("east", outside);
+        pub.setExit(EAST, outside);
 
-        lab.setExit("north", outside);
-        lab.setExit("east", office);
+        lab.setExit(NORTH, outside);
+        lab.setExit(EAST, office);
 
-        office.setExit("west", lab);
-
-        currentRoom = outside;  // start game outside
+        office.setExit(WEST, lab);
+        
     }
 
     /**
@@ -70,6 +77,8 @@ class Game
      */
     public void play() 
     {            
+
+        currentRoom = currentLevel.getSpawn();  // start game outside
         printWelcome();
 
         // Enter the main command loop.  Here we repeatedly read commands and

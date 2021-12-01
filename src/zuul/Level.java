@@ -1,12 +1,16 @@
 package zuul;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
+import com.amihaiemil.eoyaml.YamlPrinter;
 
 public class Level {
 	private String name;
@@ -52,23 +56,34 @@ public class Level {
 	// https://github.com/decorators-squad/eo-yaml/wiki/Block-Style-YAML
     public static void save(Level l, File f) {
     	// Add real saving
+    	Room r = l.getSpawn();
     	YamlMapping yaml = Yaml.createYamlMappingBuilder()
     		    .add("Level", l.getName())
     		    .add(
-    		        "devops",
-    		        Yaml.createYamlSequenceBuilder()
-    		            .add("rultor")
-    		            .add("0pdd")
-    		            .build()
-    		    ).add(
-    		        "developers",
-    		        Yaml.createYamlSequenceBuilder()
-    		            .add("amihaiemil")
-    		            .add("salikjan")
-    		            .add("SherifWally")
-    		            .build()
+    		        "Rooms",
+    		        Yaml.createYamlMappingBuilder()
+    		        	.add(r.getName(), Yaml.createYamlMappingBuilder()
+    		        		.add("Description", r.getShortDescription())
+    		        		.add("Exits", Yaml.createYamlMappingBuilder()
+    		        				.add("west", "Lab")
+    		        				.build())
+    		        		.add("X", Byte.toString(r.getX()))
+    		        		.add("Y", Byte.toString(r.getY()))
+    		        		.add("Width", Byte.toString(r.getWidth()))
+    		        		.add("Height", Byte.toString(r.getHeight()))
+    		        		.build()
+    		        		).build()
     		    ).build();
     	System.out.println(yaml);
+    	
+		try {
+			YamlPrinter printer = Yaml.createYamlPrinter(
+				    new FileWriter(f)
+				);
+	    	printer.print(yaml);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
     }
     
     public static Level load(File f) {
@@ -78,5 +93,5 @@ public class Level {
     	// Add file loading and YAML parsing
 		return l;
     }
-
+    
 }
