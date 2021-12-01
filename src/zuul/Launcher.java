@@ -1,5 +1,8 @@
 package zuul;
 
+import java.io.File;
+import java.io.IOException;
+
 // For repository viewers: https://github.com/decorators-squad/eo-yaml/releases/tag/6.0.0
 // This release of YAML library was put into the libSrc folder.
 
@@ -9,11 +12,14 @@ public class Launcher {
 	private static Game instance;
 	
 	public static void main(String args[]) {
-		Level l = createDefaultLevel();
 		
-		l.getRooms().get(3).setX(76);
-
-		Level.save(l);
+		try {
+			Level l = LevelManager.load(new File("ReadOnly.yaml"));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+//		Level.save(l);
+		
 		
 		editor = new Editor();
 		editor.start();
