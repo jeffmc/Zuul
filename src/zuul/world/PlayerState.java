@@ -9,11 +9,11 @@ public class PlayerState {
 	private Room location;
 	
 	public PlayerState() {
-		
+		location = null;
 	}
 	
 	public void setLocation(Room r, boolean utilizedPath) {
-		if (utilizedPath) {
+		if (utilizedPath&&location!=null) {
 			// TODO: Add explored functionality here
 		}
 		location = r;

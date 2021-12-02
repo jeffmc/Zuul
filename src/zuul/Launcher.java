@@ -16,16 +16,10 @@ public class Launcher {
 	private static Game instance;
 	
 	public static void main(String args[]) {
-		editor = new Editor();
-		editor.start();
-		try {
-			Level l = LevelManager.load(new File("GenesisReadOnly.yaml"));
-			editor.setActiveLevel(l);
+		Level l = LevelManager.load(new File("GenesisReadOnly.yaml"));
+		if (l != null) {
 			instance = new Game(l);
 			instance.play();
-			LevelManager.save(l);
-		} catch (IOException e) {
-			e.printStackTrace();
 		}
 	}
 	

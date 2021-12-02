@@ -19,13 +19,20 @@ import zuul.world.TwoWayPath;
 @SuppressWarnings("serial")
 public class LevelCanvas extends JPanel {
 
+	public enum DragType {
+		CAM_MOVE,
+		ROOM_MOVE,
+	}
+
 	private Color bg;
-	private Level level;
-	private int cameraX, cameraY;
-	private int lastCameraX, lastCameraY;
-	
-	private Point endDrag;
+	private Level activeLevel;
+
+	private Point camera, lastCamera;
 	private Point startDrag;
+	
+	private DragType dragType;
+	private Room movingRoom;
+	private Point startRoom;
 	
 	public LevelCanvas(Level level, Dimension size, Color background) {
 		super();
@@ -33,9 +40,14 @@ public class LevelCanvas extends JPanel {
 		this.setMinimumSize(size);
 		this.setPreferredSize(size);
 		this.setMaximumSize(size);
+		
+		camera = new Point();
+		lastCamera = new Point();
 		setActiveLevel(level);
+		
+		dragType = null;
+		// TODO: Refactor all mouse input
 		addMouseMotionListener(new MouseMotionListener() {
-			
 			@Override
 			public void mouseMoved(MouseEvent e) {
 				
@@ -43,36 +55,80 @@ public class LevelCanvas extends JPanel {
 			
 			@Override
 			public void mouseDragged(MouseEvent e) {
-				System.out.println("HERE");
-				Point nowDrag = e.getLocationOnScreen();
-				Point delta = new Point(startDrag);
-				delta.x -= nowDrag.x;
-				delta.y -= nowDrag.y;
-				cameraX = lastCameraX + delta.x;
-				cameraY = lastCameraY + delta.y;
-				repaint();
+				if (dragType != null) {
+					Point nowDrag, delta;
+					switch (dragType) {
+					case ROOM_MOVE:
+						nowDrag = e.getLocationOnScreen();
+						delta = new Point(startDrag);
+						delta.x -= nowDrag.x;
+						delta.y -= nowDrag.y;
+						movingRoom.setPosition(
+								startRoom.x - delta.x, 
+								startRoom.y - delta.y);
+						repaint();
+						break;
+					case CAM_MOVE:
+						nowDrag = e.getLocationOnScreen();
+						delta = new Point(startDrag);
+						delta.x -= nowDrag.x;
+						delta.y -= nowDrag.y;
+						camera.x = lastCamera.x + delta.x;
+						camera.y = lastCamera.y + delta.y;
+						repaint();
+						break;
+					}
+				}
 			}
 		});
 		addMouseListener(new MouseListener() {
 			@Override
 			public void mouseReleased(MouseEvent e) {
-				if (e.getButton()==MouseEvent.BUTTON2) {
+				Point endDrag, delta;
+				switch(e.getButton()) {
+				case MouseEvent.BUTTON1:
 					endDrag = e.getLocationOnScreen();
-					Point delta = new Point(startDrag);
+					delta = new Point(startDrag);
 					delta.x -= endDrag.x;
 					delta.y -= endDrag.y;
-					cameraX = lastCameraX + delta.x;
-					cameraY = lastCameraY + delta.y;
+					if (movingRoom != null) {
+						movingRoom.setPosition(
+								startRoom.x - delta.x, 
+								startRoom.y - delta.y);
+					}
+					dragType = null;
 					repaint();
+					break;
+				case MouseEvent.BUTTON2:
+					endDrag = e.getLocationOnScreen();
+					delta = new Point(startDrag);
+					delta.x -= endDrag.x;
+					delta.y -= endDrag.y;
+					camera.x = lastCamera.x + delta.x;
+					camera.y = lastCamera.y + delta.y;
+					dragType = null;
+					repaint();
+					break;
 				}
 			}
 			
 			@Override
 			public void mousePressed(MouseEvent e) {
-				if (e.getButton()==MouseEvent.BUTTON2) {
-					lastCameraX = cameraX;
-					lastCameraY = cameraY;
+				switch(e.getButton()) {
+				case MouseEvent.BUTTON1:
+					movingRoom = activeLevel.getRoom(
+							canvasCoordsToLevelCoords(e.getPoint()));
+					if (movingRoom != null) {
+						startRoom = new Point(movingRoom.getX(),movingRoom.getY());
+						startDrag = e.getLocationOnScreen();
+						dragType = DragType.ROOM_MOVE;
+					}
+					break;
+				case MouseEvent.BUTTON2:
+					lastCamera.setLocation(camera);
 					startDrag = e.getLocationOnScreen();
+					dragType = DragType.CAM_MOVE;
+					break;
 				}
 			}
 			
@@ -97,11 +153,6 @@ public class LevelCanvas extends JPanel {
 		this(null, size, background);
 	}
 	
-	public void changeCameraPosition(int dx, int dy) {
-		cameraX += dx;
-		cameraY += dy;
-	}
-	
 	@Override
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
@@ -115,12 +166,12 @@ public class LevelCanvas extends JPanel {
 		g.setColor(Color.white);
 		g.fillRect(size.width/2-2, size.height/2-2, 4, 4);
 		
-		if (level != null) {
+		if (activeLevel != null) {
 			// Center canvas at camera coords
-			centerAt(g, cameraX, cameraY);
-
+			centerAt(g, camera);
+			
 			// Draw paths
-			for (Path p : level.getPaths()) {
+			for (Path p : activeLevel.getPaths()) {
 				g.setColor(p instanceof TwoWayPath?Color.GREEN:Color.YELLOW);
 				Room a = p.getA(), b = p.getB();
 				g.drawLine(a.getX()+a.getWidth()/2, a.getY()+a.getHeight()/2,
@@ -128,9 +179,13 @@ public class LevelCanvas extends JPanel {
 			}
 			
 			// Draw rooms
-			for (Room r : level.getRooms()) {
+			for (Room r : activeLevel.getRooms()) {
 				int rx = r.getX(), ry = r.getY();
 				// Draw room rectangle and label
+				if (r == movingRoom) {
+					g.setColor(Color.RED);
+					g.fillRect(rx, ry, r.getWidth(), r.getHeight());
+				}
 				g.setColor(r.isSpawnpoint()?Color.MAGENTA:Color.BLUE);
 				g.drawRect(rx, ry, r.getWidth(), r.getHeight());
 				g.setColor(r.isSpawnpoint()?Color.PINK:Color.CYAN);
@@ -139,20 +194,27 @@ public class LevelCanvas extends JPanel {
 		}
 	}
 
-	private void centerAt(Graphics g, int centerX, int centerY) {
-		g.translate(-centerX+this.getWidth()/2,-centerY+this.getHeight()/2);
+	private Point canvasCoordsToLevelCoords(Point canvas) {
+		Point lvl = new Point(camera);
+		lvl.x -= getWidth()/2-canvas.x;
+		lvl.y -= getHeight()/2-canvas.y;
+		return lvl;
+	}
+	
+	private void centerAt(Graphics g, Point center) {
+		g.translate(-center.x+this.getWidth()/2,-center.y+this.getHeight()/2);
 		
 	}
 
 	public void setActiveLevel(Level l) {
-		level = l;
+		activeLevel = l;
 		if (l != null) {
-			Room s = level.getSpawn();
-			cameraX = s.getX()+s.getWidth()/2;
-			cameraY = s.getY()+s.getHeight()/2;
+			// Center camera at spawn room
+			Room s = activeLevel.getSpawn();
+			camera.setLocation(s.getX()+s.getWidth()/2,
+					s.getY()+s.getHeight()/2);
 		} else {
-			cameraX = 0;
-			cameraY = 0;
+			camera.setLocation(0, 0);
 		}
 		repaint();
 	}

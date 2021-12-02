@@ -3,6 +3,7 @@ package zuul;
 import zuul.cmd.Command;
 import zuul.cmd.CommandParser;
 import zuul.world.Level;
+import zuul.world.PlayerState;
 import zuul.world.Room;
 
 /**
@@ -26,7 +27,8 @@ class Game
 {
     private CommandParser cmdParser;
     private Level level;
-    private Room currentRoom;
+    private PlayerState playerState;
+//    private Room currentRoom;
         
     public static final String NORTH = "north", EAST = "east", SOUTH = "south", WEST = "west";
     
@@ -44,8 +46,8 @@ class Game
      */
     public void play() 
     {            
-
-        currentRoom = level.getSpawn();  // start game outside
+    	playerState = new PlayerState();
+        playerState.setLocation(level.getSpawn(), true);  // start game outside
         printWelcome();
 
         // Enter the main command loop.  Here we repeatedly read commands and
@@ -69,7 +71,7 @@ class Game
         System.out.println("Adventure is a new, incredibly boring adventure game.");
         System.out.println("Type 'help' if you need help.");
         System.out.println();
-        System.out.println(currentRoom.getLongDescription());
+        System.out.println(playerState.getLocation().getLongDescription());
     }
 
     /**
@@ -128,13 +130,13 @@ class Game
         String direction = command.getSecondWord();
 
         // Try to leave current room.
-        Room nextRoom = currentRoom.getExit(direction);
+        Room nextRoom = playerState.getLocation().getExit(direction);
 
         if (nextRoom == null)
             System.out.println("There is no door!");
         else {
-            currentRoom = nextRoom;
-            System.out.println(currentRoom.getLongDescription());
+            playerState.setLocation(nextRoom, true);
+            System.out.println(nextRoom.getLongDescription());
         }
     }
 

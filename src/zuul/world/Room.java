@@ -1,8 +1,8 @@
 package zuul.world;
+import java.awt.Point;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -254,6 +254,10 @@ public class Room {
 
 	public void updateSpawnStatus() {
 		isSpawn = level.getSpawn()==this;
+	}
+	
+	public boolean contains(Point p) {
+		return p.x>=x&&p.x<=x+width&&p.y>=y&&p.y<=y+height;
 	}
 }
 

@@ -1,5 +1,6 @@
 package zuul.world;
 
+import java.awt.Point;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -84,6 +85,12 @@ public class Level {
     
     public Set<Path> getPaths() {
     	return paths;
+    }
+    
+    public Room getRoom(Point p) {
+    	for (Room r : rooms) 
+    		if (r.contains(p)) return r;
+    	return null;
     }
     
 }
