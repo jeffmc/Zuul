@@ -9,6 +9,7 @@ import java.awt.Insets;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 
+import zuul.renderer.Renderer;
 import zuul.world.Level;
 
 public class Editor {
@@ -17,6 +18,8 @@ public class Editor {
 	private Level activeLevel;
 	private LevelCanvas lc;
 	
+	private Renderer renderer;
+	
 	private static final int EDITOR_SIZE = 768;
 	
 	public Editor() {
@@ -24,6 +27,8 @@ public class Editor {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setResizable(true);
 		frame.setLayout(new GridBagLayout());
+		renderer = new Renderer();
+		
 		makeGui();
 		frame.pack();
 	}
@@ -37,7 +42,7 @@ public class Editor {
 		lcc.gridwidth = 3;
 		lcc.gridheight = 3;
 		lcc.insets = pdg;
-		lc = new LevelCanvas(new Dimension(EDITOR_SIZE,EDITOR_SIZE), Color.BLACK);
+		lc = new LevelCanvas(new Dimension(EDITOR_SIZE,EDITOR_SIZE), Color.BLACK, renderer);
 		frame.add(lc, lcc);
 		
 		GridBagConstraints jbc = new GridBagConstraints();

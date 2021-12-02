@@ -1,7 +1,6 @@
 package zuul;
 
 import java.io.File;
-import java.io.IOException;
 
 import zuul.util.LevelManager;
 import zuul.world.Level;
@@ -17,6 +16,10 @@ public class Launcher {
 	
 	public static void main(String args[]) {
 		Level l = LevelManager.load(new File("GenesisReadOnly.yaml"));
+		editor = new Editor();
+		editor.start();
+		editor.setActiveLevel(l);
+		
 		if (l != null) {
 			instance = new Game(l);
 			instance.play();
@@ -24,6 +27,7 @@ public class Launcher {
 	}
 	
 	@Deprecated
+	@SuppressWarnings("unused")
     private static Level createDefaultLevel()
     {
     	Level l = new Level("Genesis", false);

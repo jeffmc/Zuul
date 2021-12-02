@@ -7,6 +7,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import zuul.math.Int2;
+import zuul.math.IntTransform;
+
 /*
  * Class Room - a room in an adventure game.
  *
@@ -26,7 +29,8 @@ public class Room {
 	private String name; // name of room (used in level saving-loading)
     private String description; // description of the room
     private HashMap<String, Room> exits; // stores exits of this room.
-    private int x, y, width, height; // coordinates and size of the room, defined as a box by top-left corner.
+//    private int x, y, width, height; // coordinates and size of the room, defined as a box by top-left corner.
+    private IntTransform transform; 
     
     // Not-serialized
     private boolean isSpawn;
@@ -38,23 +42,23 @@ public class Room {
      * "description" is something like "in a kitchen" or "in an open court 
      * yard".
      */
-    public Room(String name, String description, int x, int y, int width, int height) 
-    {
+    public Room(String name, String description, IntTransform transform) { 
     	this.name = name;
         this.description = description;
-        this.x = x;
-        this.y = y;
-        this.width = width;
-        this.height = height;
+        this.transform = transform;
         
         isSpawn = false;
         exits = new HashMap<String, Room>();
         paths = new HashSet<Path>();
     }
 
-   public Room(String name, String description) 
+    public Room(String name, String description, int x, int y, int width, int height) {
+    	this(name, description, new IntTransform(x, y, width, height));
+    }
+   
+    public Room(String name, String description) 
    {
-	   this(name, description,240,103,50,50); // default coordinates and size (centered and 50x50)
+	   this(name, description, 240, 103, 50, 50); // default coordinates and size (centered and 50x50)
    }
    
    private void repaint() {
@@ -175,68 +179,67 @@ public class Room {
 
 	// Get X coord
 	public int getX() {
-		return x;
+		return transform.position.x;
 	}
 
 	// Set X coord
 	public void setX(int x) {
 		repaint();
-		this.x = x;
+		transform.position.x = x;
 	}
 
 	// Get Y coord
 	public int getY() {
-		return y;
+		return transform.position.y;
 	}
 
 	// Set Y coord
 	public void setY(int y) {
 		repaint();
-		this.y = y;
+		transform.position.y = y;
 	}
 
 	// Get width
 	public int getWidth() {
-		return width;
+		return transform.scale.x;
 	}
 
 	// Set width
 	public void setWidth(int width) {
 		repaint();
-		this.width = width;
+		transform.scale.x = width;
 	}
 
 	// Get height
 	public int getHeight() {
-		return height;
+		return transform.scale.y;
 	}
 
 	// Set height
 	public void setHeight(int height) {
 		repaint();
-		this.height = height;
+		transform.scale.y = height;
 	}
 	
 	// Set coordinates (x,y)
-	public void setPosition(int x, int y) {
-		this.x = x;
-		this.y = y;
+	public void setPosition(Int2 position) {
+		transform.position = position;
 		repaint();
+	}
+	
+	public void setPosition(int x, int y) {
+		transform.position.set(x,y);
 	}
 	
 	// Set size (width, height)
 	public void setSize(int width, int height) {
-		this.width = width;
-		this.height = height;
+		transform.scale.set(width, height);
 		repaint();
 	}
 	
 	// Set size and position (x, y, width, height) More efficient for repainting GUI
 	public void setTransform(int x, int y, int width, int height) {
-		this.x = x;
-		this.y = y;
-		this.width = width;
-		this.height = height;
+		transform.set(x, y, width, height);
 		repaint();
 	}
 	
@@ -256,8 +259,10 @@ public class Room {
 		isSpawn = level.getSpawn()==this;
 	}
 	
-	public boolean contains(Point p) {
-		return p.x>=x&&p.x<=x+width&&p.y>=y&&p.y<=y+height;
+	public boolean contains(Int2 p) { // TODO: Doesn't work for negative scale rect or have oval support
+		Int2 o = transform.position; // o for origin
+		Int2 s = transform.scale;
+		return p.x>=o.x&&p.x<=o.x+s.x&&p.y>=o.y&&p.y<=o.y+s.y;
 	}
 }
 

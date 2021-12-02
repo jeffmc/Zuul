@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import zuul.math.Int2;
 import zuul.util.Signal;
 
 public class Level {
@@ -87,7 +88,7 @@ public class Level {
     	return paths;
     }
     
-    public Room getRoom(Point p) {
+    public Room getRoom(Int2 p) {
     	for (Room r : rooms) 
     		if (r.contains(p)) return r;
     	return null;

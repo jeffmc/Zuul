@@ -4,17 +4,16 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Point;
-import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 
 import javax.swing.JPanel;
 
+import zuul.math.Int2;
+import zuul.renderer.Renderer;
 import zuul.world.Level;
-import zuul.world.Path;
 import zuul.world.Room;
-import zuul.world.TwoWayPath;
 
 @SuppressWarnings("serial")
 public class LevelCanvas extends JPanel {
@@ -24,25 +23,27 @@ public class LevelCanvas extends JPanel {
 		ROOM_MOVE,
 	}
 
-	private Color bg;
+	private Color background;
 	private Level activeLevel;
 
-	private Point camera, lastCamera;
+	private Int2 camera, lastCamera;
 	private Point startDrag;
 	
 	private DragType dragType;
 	private Room movingRoom;
 	private Point startRoom;
+	private Renderer renderer;
 	
-	public LevelCanvas(Level level, Dimension size, Color background) {
+	public LevelCanvas(Level level, Dimension size, Color background, Renderer renderer) {
 		super();
-		bg = background;
+		this.background = background;
+		this.renderer = renderer;
 		this.setMinimumSize(size);
 		this.setPreferredSize(size);
 		this.setMaximumSize(size);
 		
-		camera = new Point();
-		lastCamera = new Point();
+		camera = new Int2();
+		lastCamera = new Int2();
 		setActiveLevel(level);
 		
 		dragType = null;
@@ -125,7 +126,7 @@ public class LevelCanvas extends JPanel {
 					}
 					break;
 				case MouseEvent.BUTTON2:
-					lastCamera.setLocation(camera);
+					lastCamera.set(camera);
 					startDrag = e.getLocationOnScreen();
 					dragType = DragType.CAM_MOVE;
 					break;
@@ -149,61 +150,22 @@ public class LevelCanvas extends JPanel {
 		});
 	}
 	
-	public LevelCanvas(Dimension size, Color background) {
-		this(null, size, background);
+	public LevelCanvas(Dimension size, Color background, Renderer renderer) {
+		this(null, size, background, renderer);
 	}
 	
 	@Override
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
-		// TODO: Add scaling
-		// Fill background with background color specified in constructor.
-		g.setColor(bg);
-		Rectangle size = g.getClipBounds();
-		g.fillRect(size.x, size.y, size.width, size.height);
-
-		// Draw 4x4 white rect at center of board
-		g.setColor(Color.white);
-		g.fillRect(size.width/2-2, size.height/2-2, 4, 4);
-		
-		if (activeLevel != null) {
-			// Center canvas at camera coords
-			centerAt(g, camera);
-			
-			// Draw paths
-			for (Path p : activeLevel.getPaths()) {
-				g.setColor(p instanceof TwoWayPath?Color.GREEN:Color.YELLOW);
-				Room a = p.getA(), b = p.getB();
-				g.drawLine(a.getX()+a.getWidth()/2, a.getY()+a.getHeight()/2,
-						b.getX()+b.getWidth()/2, b.getY()+b.getHeight()/2);
-			}
-			
-			// Draw rooms
-			for (Room r : activeLevel.getRooms()) {
-				int rx = r.getX(), ry = r.getY();
-				// Draw room rectangle and label
-				if (r == movingRoom) {
-					g.setColor(Color.RED);
-					g.fillRect(rx, ry, r.getWidth(), r.getHeight());
-				}
-				g.setColor(r.isSpawnpoint()?Color.MAGENTA:Color.BLUE);
-				g.drawRect(rx, ry, r.getWidth(), r.getHeight());
-				g.setColor(r.isSpawnpoint()?Color.PINK:Color.CYAN);
-				g.drawString(r.getName(), rx, ry);
-			}
-		}
+//		renderer.oldDraw(g, background, activeLevel, camera, movingRoom);
+		renderer.drawElements(g, background, camera);
 	}
 
-	private Point canvasCoordsToLevelCoords(Point canvas) {
-		Point lvl = new Point(camera);
+	private Int2 canvasCoordsToLevelCoords(Point canvas) {
+		Int2 lvl = new Int2(camera.x, camera.y); // TODO: Add Int2(Int2 clone) constructor
 		lvl.x -= getWidth()/2-canvas.x;
 		lvl.y -= getHeight()/2-canvas.y;
 		return lvl;
-	}
-	
-	private void centerAt(Graphics g, Point center) {
-		g.translate(-center.x+this.getWidth()/2,-center.y+this.getHeight()/2);
-		
 	}
 
 	public void setActiveLevel(Level l) {
@@ -211,16 +173,17 @@ public class LevelCanvas extends JPanel {
 		if (l != null) {
 			// Center camera at spawn room
 			Room s = activeLevel.getSpawn();
-			camera.setLocation(s.getX()+s.getWidth()/2,
+			camera.set(s.getX()+s.getWidth()/2,
 					s.getY()+s.getHeight()/2);
+			renderer.setLevel(l);
 		} else {
-			camera.setLocation(0, 0);
+			camera.set(0, 0);
 		}
 		repaint();
 	}
 	
 	public void setBackground(Color c) {
-		bg = c;
+		background = c;
 		repaint();
 	}
 	
