@@ -1,5 +1,7 @@
 package zuul.math;
 
+import java.util.StringTokenizer;
+
 public class IntTransform {
 	public Int2 position, scale;
 	
@@ -25,5 +27,15 @@ public class IntTransform {
 	public void set(IntTransform o) {
 		position.set(o.position);
 		scale.set(o.scale);
+	}
+
+	public String toString() {
+		return "["+ position.toString() + " & " + scale.toString() + "]";
+	}
+	public static IntTransform parseIntTransform(String src) {
+		StringTokenizer tkn = new StringTokenizer(src.trim(), "[]&"); // TODO: Fix with regex
+		return new IntTransform(
+				Int2.parseInt2(tkn.nextToken()), 
+				Int2.parseInt2(tkn.nextToken()));
 	}
 }

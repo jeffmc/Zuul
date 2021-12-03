@@ -1,59 +1,72 @@
+# Zuul Level File, by Jeff McMillan - https://github.com/jeffmc/Zuul
+---
 LevelName: GenesisSaved
 Spawn: Outside
 Rooms:
   Outside:
     Description: outside the main entrance of the university
-    Exits:
-      east: Theatre
-      south: Lab
-      west: Pub
-    X: 200
-    Y: 200
-    Width: 50
-    Height: 50
+    Transform: "[(200, 200) & (50, 50)]"
   Theatre:
     Description: in a lecture theatre
-    Exits:
-      west: Outside
-    X: 260
-    Y: 200
-    Width: 50
-    Height: 50
+    Transform: "[(260, 200) & (50, 50)]"
   Pub:
     Description: in the campus pub
-    Exits:
-      east: Outside
-    X: 140
-    Y: 200
-    Width: 50
-    Height: 50
+    Transform: "[(140, 200) & (50, 50)]"
   Lab:
     Description: in a computing lab
-    Exits:
-      east: Office
-      north: Outside
-    X: 200
-    Y: 260
-    Width: 50
-    Height: 50
+    Transform: "[(200, 260) & (50, 50)]"
   Office:
     Description: in the computing admin office
-    Exits:
-      west: Lab
-      tunnel: Theatre
-      ladder: Outside
-      lock: Vault
-    X: 260
-    Y: 260
-    Width: 50
-    Height: 50
+    Transform: "[(260, 260) & (50, 50)]"
   Vault:
     Description: where the money is at
-    Exits:
-      door: Office
-      hatch: Pub
-    X: 320
-    Y: 260
-    Width: 30
-    Height: 30
-    
+    Transform: "[(320, 260) & (30, 30)]"
+Paths:
+  -
+    Type: TWO_WAY
+    A: Outside
+    B: Pub
+    AName: west
+    BName: east
+  -
+    Type: TWO_WAY
+    A: Lab
+    B: Office
+    AName: east
+    BName: west
+  -
+    Type: ONE_WAY
+    Parent: Office
+    Child: Theatre
+    IsBlind: true
+    ParentName: tunnel
+  -
+    Type: TWO_WAY
+    A: Outside
+    B: Lab
+    AName: south
+    BName: north
+  -
+    Type: ONE_WAY
+    Parent: Office
+    Child: Outside
+    IsBlind: true
+    ParentName: ladder
+  -
+    Type: TWO_WAY
+    A: Office
+    B: Vault
+    AName: lock
+    BName: door
+  -
+    Type: TWO_WAY
+    A: Outside
+    B: Theatre
+    AName: east
+    BName: west
+  -
+    Type: ONE_WAY
+    Parent: Vault
+    Child: Pub
+    IsBlind: true
+    ParentName: hatch

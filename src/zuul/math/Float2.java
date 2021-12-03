@@ -10,6 +10,10 @@ public class Float2 {
 		this.x = 1;
 		this.y = 1;
 	}
+	public Float2(Float2 o) {
+		this.x = o.x;
+		this.y = o.y;
+	}
 	public static Float2 clone(Float2 o) {
 		return new Float2(o.x, o.y);
 	}

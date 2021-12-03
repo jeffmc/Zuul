@@ -1,5 +1,7 @@
 package zuul.math;
 
+import java.util.StringTokenizer;
+
 public class Int2 {
 	public int x,y;
 	public Int2(int x,int y) {
@@ -9,6 +11,10 @@ public class Int2 {
 	public Int2() {
 		this.x = 1;
 		this.y = 1;
+	}
+	public Int2(Int2 o) {
+		this.x = o.x;
+		this.y = o.y;
 	}
 	public static Int2 clone(Int2 o) {
 		return new Int2(o.x, o.y);
@@ -77,5 +83,16 @@ public class Int2 {
 	}
 	public static Int2 div(Int2 a, Int2 b) {
 		return new Int2(a.x / b.x, a.y / b.y);
+	}
+	
+	@Override
+	public String toString() {
+		return "("+ Integer.toString(x) + ", " + Integer.toString(y) + ")";
+	}
+	public static Int2 parseInt2(String src) {
+		StringTokenizer tkn = new StringTokenizer(src.trim(), "(),"); // TODO: Fix with regex
+		return new Int2(
+				Integer.parseInt(tkn.nextToken().trim()), 
+				Integer.parseInt(tkn.nextToken().trim()));
 	}
 }

@@ -3,8 +3,6 @@ package zuul.util;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Map.Entry;
 
 import com.amihaiemil.eoyaml.Yaml;
@@ -13,9 +11,15 @@ import com.amihaiemil.eoyaml.YamlMapping;
 import com.amihaiemil.eoyaml.YamlMappingBuilder;
 import com.amihaiemil.eoyaml.YamlNode;
 import com.amihaiemil.eoyaml.YamlPrinter;
+import com.amihaiemil.eoyaml.YamlSequence;
+import com.amihaiemil.eoyaml.YamlSequenceBuilder;
 
+import zuul.math.IntTransform;
 import zuul.world.Level;
+import zuul.world.OneWayPath;
+import zuul.world.Path;
 import zuul.world.Room;
+import zuul.world.TwoWayPath;
 
 public class LevelManager {
 
@@ -24,7 +28,7 @@ public class LevelManager {
 	
 	// https://github.com/decorators-squad/eo-yaml/wiki/Block-Style-YAML
     public static void save(Level l, File f) {
-    	// Create level mapping
+    	// Create root mapping
     	YamlMappingBuilder level = Yaml.createYamlMappingBuilder()
     		    .add("LevelName", l.getName())
     		    .add("Spawn", l.getSpawn().getName());
@@ -40,20 +44,48 @@ public class LevelManager {
         	// Make singular room data mapping (contains exits mapping) and add to rooms mapping
     		rooms = rooms.add(r.getName(), Yaml.createYamlMappingBuilder()
 		        		.add("Description", r.getShortDescription())
-		        		.add("Exits", exits.build())
-		        		.add("X", Integer.toString(r.getX()))
-		        		.add("Y", Integer.toString(r.getY()))
-		        		.add("Width", Integer.toString(r.getWidth()))
-		        		.add("Height", Integer.toString(r.getHeight()))
-		        		.build()
-		        		);
+		        		.add("Transform", r.getTransform().toString())
+		        		.build());
     	}
-
-    	// Add rooms mapping to level mapping
+    	// Add rooms mapping to root mapping
 	    level = level.add("Rooms", rooms.build());
+
+    	// Create paths mapping
+	    YamlSequenceBuilder paths = Yaml.createYamlSequenceBuilder();
+	    for (Path p : l.getPaths()) {
+			YamlMappingBuilder builder = Yaml.createYamlMappingBuilder();
+	    	switch (p.getType()) {
+			case ONE_WAY:
+				OneWayPath owp = OneWayPath.class.cast(p);
+				boolean isBlind = owp.isChildBlind();
+				builder = builder
+					.add("Type", p.getType().name())
+					.add("Parent", p.getA().getName())
+					.add("Child", p.getB().getName())
+					.add("IsBlind", Boolean.toString(isBlind))
+					.add("ParentName", p.getAName());
+				if (!isBlind) builder = builder.add("ChildName", p.getBName());
+				break;
+			case TWO_WAY:
+				TwoWayPath twp = TwoWayPath.class.cast(p);
+				builder = builder
+					.add("Type", p.getType().name())
+					.add("A", p.getA().getName())
+					.add("B", p.getB().getName())
+					.add("AName", p.getAName())
+					.add("BName", p.getBName());
+				break;
+			case CONDITIONAL:
+			default:
+				throw new IllegalStateException("Unsupported Path Type: " + p.getType());
+	    	}
+			paths = paths.add(builder.build());
+	    }
+    	// Add paths mapping to root mapping
+	    level = level.add("Paths", paths.build());
     	
 	    // Build level mapping and output
-    	YamlMapping yaml = level.build();
+    	YamlMapping yaml = level.build("Zuul Level File, by Jeff McMillan - https://github.com/jeffmc/Zuul");
 		try {
 			YamlPrinter printer = Yaml.createYamlPrinter(
 				    new FileWriter(f)
@@ -68,7 +100,7 @@ public class LevelManager {
     	save(l, new File(l.getName() + ".yaml"));
     }
 
-	public static Level load(File f) {
+	public static Level load(File f) { // TODO: Remove exit loading
 		try {
 			// Setup Yaml input
 			YamlInput in = Yaml.createYamlInput(f);
@@ -79,39 +111,52 @@ public class LevelManager {
 			
 			// Parse rooms into the level as Room objects and into exitMapping to be parsed later
 	    	YamlMapping rooms = root.yamlMapping("Rooms");
-	    	Map<Room, YamlMapping> exitMapping = new HashMap<>();
 	    	for (YamlNode k : rooms.keys()) {
 	    		YamlMapping r = rooms.yamlMapping(k);
 	    		Room room = new Room(
 	    				k.asScalar().value(),
 	    				r.string("Description"),
-	    				r.integer("X"),
-	    				r.integer("Y"),
-	    				r.integer("Width"),
-	    				r.integer("Height")
+	    				IntTransform.parseIntTransform(r.string("Transform"))
 					);
 	    		level.add(room);
-	    		exitMapping.put(room, r.yamlMapping("Exits"));
 	    	}
 	    	
 	    	// Set spawn by finding in level via name.
 	    	Room spawnRoom = level.getRoom(root.string("Spawn"));
 	    	level.setSpawn(spawnRoom);
-	    	spawnRoom.updateSpawnStatus();
 	    	
-	    	// Parse through exit mappings and apply to Room objects in level
-	    	for (Entry<Room, YamlMapping> e : exitMapping.entrySet()) {
-	    		Room room = e.getKey();
-	    		YamlMapping exits = e.getValue();
-	        	for (YamlNode d : exits.keys()) {
-	        		String roomName = exits.string(d);
-	        		Room exitRoom = level.getRoom(roomName);
-	        		if (exitRoom == null) throw new IOException("Invalid exit for '" + room.getName() + "': '" + roomName + "'!");
-	        		room.setExit(d.asScalar().value(), exitRoom);
-	        	}
+	    	YamlSequence paths = root.yamlSequence("Paths");
+	    	for (YamlNode k : paths.values()) {
+	    		YamlMapping r = YamlMapping.class.cast(k);
+	    		String strType = r.string("Type");
+	    		Path.PathType type = Path.PathType.valueOf(strType);
+	    		Path path;
+	    		switch (type) {
+				case ONE_WAY:
+					boolean isBlind = Boolean.valueOf(r.string("IsBlind"));
+					path = new OneWayPath(
+							level.getRoom(r.string("Parent")),
+							level.getRoom(r.string("Child")), 
+							r.string("ParentName"),
+							isBlind?null:r.string("ChildName"),
+							isBlind);
+					break;
+				case TWO_WAY:
+					path = new TwoWayPath(
+							level.getRoom(r.string("A")),
+							level.getRoom(r.string("B")), 
+							r.string("AName"),
+							r.string("BName"));
+					break;
+				case CONDITIONAL:
+				default:
+					throw new IllegalStateException("Unsupported Path Type: " + type);
+	    		}
+	    		level.add(path);
 	    	}
+	    	
 	    	for (Room r : level.getRooms())
-				r.calcPaths();
+				r.calcExits();
 	    	System.out.println(level.getPaths().size() + " total paths!");
 			level.completedLoading();
 			return level;

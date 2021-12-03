@@ -16,6 +16,8 @@ public class Launcher {
 	
 	public static void main(String args[]) {
 		Level l = LevelManager.load(new File("GenesisReadOnly.yaml"));
+		LevelManager.save(l);
+		
 		editor = new Editor();
 		editor.start();
 		editor.setActiveLevel(l);

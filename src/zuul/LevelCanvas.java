@@ -16,7 +16,7 @@ import zuul.world.Level;
 import zuul.world.Room;
 
 @SuppressWarnings("serial")
-public class LevelCanvas extends JPanel {
+public class LevelCanvas extends JPanel { // TODO: Eliminate all repaint in favor of drawing loop.
 
 	public enum DragType {
 		CAM_MOVE,
@@ -47,7 +47,7 @@ public class LevelCanvas extends JPanel {
 		setActiveLevel(level);
 		
 		dragType = null;
-		// TODO: Refactor all mouse input
+		// TODO: Refactor all mouse input into own class
 		addMouseMotionListener(new MouseMotionListener() {
 			@Override
 			public void mouseMoved(MouseEvent e) {
@@ -157,12 +157,11 @@ public class LevelCanvas extends JPanel {
 	@Override
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
-//		renderer.oldDraw(g, background, activeLevel, camera, movingRoom);
 		renderer.drawElements(g, background, camera);
 	}
 
 	private Int2 canvasCoordsToLevelCoords(Point canvas) {
-		Int2 lvl = new Int2(camera.x, camera.y); // TODO: Add Int2(Int2 clone) constructor
+		Int2 lvl = new Int2(camera);
 		lvl.x -= getWidth()/2-canvas.x;
 		lvl.y -= getHeight()/2-canvas.y;
 		return lvl;
@@ -175,7 +174,7 @@ public class LevelCanvas extends JPanel {
 			Room s = activeLevel.getSpawn();
 			camera.set(s.getX()+s.getWidth()/2,
 					s.getY()+s.getHeight()/2);
-			renderer.setLevel(l);
+			renderer.setRenderables(l.getRenderables());
 		} else {
 			camera.set(0, 0);
 		}

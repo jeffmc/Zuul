@@ -16,4 +16,19 @@ public class TwoWayPath extends Path {
 		return true;
 	}
 
+	@Override
+	public boolean potentionalToA() {
+		return true;
+	}
+
+	@Override
+	public boolean potentionalToB() {
+		return true;
+	}
+
+	@Override
+	public PathType getType() {
+		return PathType.TWO_WAY;
+	}
+
 }

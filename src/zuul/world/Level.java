@@ -1,12 +1,12 @@
 package zuul.world;
 
-import java.awt.Point;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import zuul.math.Int2;
+import zuul.renderer.Renderable;
 import zuul.util.Signal;
 
 public class Level {
@@ -16,7 +16,6 @@ public class Level {
 	private Room spawnRoom; // Room to spawn in, start the player in.
 	
 	// Not serialized
-	private Signal repaintSignal;
     private boolean loadingComplete; // Do not trigger repaints while this is true
     private Set<Path> paths;
 	
@@ -26,7 +25,6 @@ public class Level {
 		paths = new HashSet<Path>();
 		
 		this.loadingComplete = loadingComplete;
-		repaintSignal = new Signal("Level repaint: " + name, false);
 	}
 
 	public Level(String name) {
@@ -39,8 +37,8 @@ public class Level {
 	}
 	
 	public void repaint() {
-		if (loadingComplete)
-			repaintSignal.run();
+//		if (loadingComplete)
+//			repaintSignal.run();
 	}
 
 	public void setSpawn(Room r) { // Checks if this level contains room first, then assigns spawn to room.
@@ -93,5 +91,15 @@ public class Level {
     		if (r.contains(p)) return r;
     	return null;
     }
+
+	public Set<Renderable> getRenderables() {
+		Set<Renderable> renderables = new HashSet<>();
+		for (Path p : getPaths())
+			renderables.add(p.getRenderable());
+		for (Room r : getRooms()) 
+			renderables.add(r.getRenderable());
+		// TODO: Text elements
+		return renderables;
+	}
     
 }

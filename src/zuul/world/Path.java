@@ -1,13 +1,27 @@
 package zuul.world;
 
+import java.awt.Color;
+
+import zuul.math.Int2;
+import zuul.math.IntTransform;
+import zuul.renderer.Material;
+import zuul.renderer.Renderable;
+import zuul.renderer.Renderable.Shape;
+
 public abstract class Path {
-	protected Room a, b;
+	// Serialized fields
+	private Room a, b;
 	private String aName, bName;
+	// TYPE WILL BE SERIALIZED TOO.
 	
 	// TODO: Add conditional paths (based on player inventory, explored paths/rooms, etc.)
-	public Path(Room _a, Room _b, String aName, String bName) {
-		a=_a;
-		b=_b;
+	public Path(Room _a, Room _b, String _aName, String _bName) {
+		this.a = _a;
+		this.b = _b;
+		this.aName = _aName;
+		this.bName = _bName;
+		a.addPath(this);
+		b.addPath(this);
 		if (a == b) throw new IllegalArgumentException("Invalid path, rooms are the same!");
 		if (a.getLevel() != b.getLevel()) throw new IllegalArgumentException("Rooms don't have same parent level!");
 	}
@@ -28,10 +42,31 @@ public abstract class Path {
 		return bName;
 	}
 
+	public abstract boolean potentionalToA();
+	
+	public abstract boolean potentionalToB();
+	
 	public abstract boolean accessToA(PlayerState ps);
 //		return b.getExits().values().contains(a);
 	
 	public abstract boolean accessToB(PlayerState ps);
 //		return a.getExits().values().contains(b);
+
+	public abstract PathType getType();
 	
+	public Renderable getRenderable() {
+		Room a = getA(), b = getB();
+		int ax = a.getX()+a.getWidth()/2, ay = a.getY()+a.getHeight()/2;
+		int bx = b.getX()+b.getWidth()/2, by = b.getY()+b.getHeight()/2;
+		return new Renderable(
+				Shape.LINE,
+				Material.stroke(this instanceof TwoWayPath?Color.GREEN:Color.YELLOW), // TODO: Update room material on select.
+				new IntTransform(new Int2(ax, ay), new Int2(bx, by)));
+	}
+	
+	public enum PathType {
+		TWO_WAY,
+		ONE_WAY,
+		CONDITIONAL;
+	}
 }

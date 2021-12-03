@@ -1,0 +1,60 @@
+# Zuul Level File, by Jeff McMillan - https://github.com/jeffmc/Zuul
+---
+LevelName: GenesisSaved
+Spawn: Outside
+Rooms:
+  Outside:
+    Description: outside the main entrance of the university
+    Exits:
+      east: Theatre
+      south: Lab
+      west: Pub
+    X: 200
+    Y: 200
+    Width: 50
+    Height: 50
+  Theatre:
+    Description: in a lecture theatre
+    Exits:
+      west: Outside
+    X: 260
+    Y: 200
+    Width: 50
+    Height: 50
+  Pub:
+    Description: in the campus pub
+    Exits:
+      east: Outside
+    X: 140
+    Y: 200
+    Width: 50
+    Height: 50
+  Lab:
+    Description: in a computing lab
+    Exits:
+      east: Office
+      north: Outside
+    X: 200
+    Y: 260
+    Width: 50
+    Height: 50
+  Office:
+    Description: in the computing admin office
+    Exits:
+      ladder: Outside
+      west: Lab
+      lock: Vault
+      tunnel: Theatre
+    X: 260
+    Y: 260
+    Width: 50
+    Height: 50
+  Vault:
+    Description: where the money is at
+    Exits:
+      door: Office
+      hatch: Pub
+    X: 320
+    Y: 260
+    Width: 30
+    Height: 30

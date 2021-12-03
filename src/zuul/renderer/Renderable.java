@@ -17,6 +17,6 @@ public class Renderable {
 	public enum Shape {
 		BOX, 
 		LINE, // Line is special, position used as origin, and scale used as delta, fill is not supported
-		ELLIPSE;
+		OVAL;
 	}
 }
