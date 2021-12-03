@@ -23,6 +23,7 @@ public class LevelCanvas extends JPanel { // TODO: Eliminate all repaint in favo
 		ROOM_MOVE,
 	}
 
+	private Editor editor;
 	private Color background;
 	private Level activeLevel;
 
@@ -34,8 +35,9 @@ public class LevelCanvas extends JPanel { // TODO: Eliminate all repaint in favo
 	private Point startRoom;
 	private Renderer renderer;
 	
-	public LevelCanvas(Level level, Dimension size, Color background, Renderer renderer) {
+	public LevelCanvas(Editor editor, Level level, Dimension size, Color background, Renderer renderer) {
 		super();
+		this.editor = editor;
 		this.background = background;
 		this.renderer = renderer;
 		this.setMinimumSize(size);
@@ -119,6 +121,7 @@ public class LevelCanvas extends JPanel { // TODO: Eliminate all repaint in favo
 				case MouseEvent.BUTTON1:
 					movingRoom = activeLevel.getRoom(
 							canvasCoordsToLevelCoords(e.getPoint()));
+					editor.selectRoom(movingRoom);
 					if (movingRoom != null) {
 						startRoom = new Point(movingRoom.getX(),movingRoom.getY());
 						startDrag = e.getLocationOnScreen();
@@ -150,8 +153,8 @@ public class LevelCanvas extends JPanel { // TODO: Eliminate all repaint in favo
 		});
 	}
 	
-	public LevelCanvas(Dimension size, Color background, Renderer renderer) {
-		this(null, size, background, renderer);
+	public LevelCanvas(Editor editor, Dimension size, Color background, Renderer renderer) {
+		this(editor, null, size, background, renderer);
 	}
 	
 	@Override

@@ -113,8 +113,8 @@ public class Room {
 			} else if (p.getB()==this) { 
 				isa = false; 
 			} else { throw new IllegalStateException("Path doesn't contain this room as A or B!"); }
-			if ((isa&&p.potentionalToB())||
-				((!isa)&&p.potentionalToA())) 
+			if ((isa&&p.potentialToB())||
+				((!isa)&&p.potentialToA())) 
 					this.exits.put(isa?p.getAName():p.getBName(), isa?p.getB():p.getA());
 		}
 //		System.out.println(this.getName() + ":");
@@ -296,7 +296,7 @@ public class Room {
 	}
 	
 	public boolean contains(Int2 p) { // TODO: Doesn't work for negative scale rect or have oval support
-		Int2 o = transform.position; // o for origin
+		Int2 o = new Int2(transform.position).sub(new Int2(transform.scale).div(2)); // o for origin, (UPPER-LEFT)
 		Int2 s = transform.scale;
 		return p.x>=o.x&&p.x<=o.x+s.x&&p.y>=o.y&&p.y<=o.y+s.y;
 	}

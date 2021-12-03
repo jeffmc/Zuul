@@ -11,6 +11,7 @@ import javax.swing.JFrame;
 
 import zuul.renderer.Renderer;
 import zuul.world.Level;
+import zuul.world.Room;
 
 public class Editor {
 	private JFrame frame;
@@ -19,6 +20,8 @@ public class Editor {
 	private LevelCanvas lc;
 	
 	private Renderer renderer;
+	
+	private Room selectedRoom;
 	
 	private static final int EDITOR_SIZE = 768;
 	
@@ -31,6 +34,8 @@ public class Editor {
 		
 		makeGui();
 		frame.pack();
+		
+		selectedRoom = null;
 	}
 	
 	private void makeGui() {
@@ -42,7 +47,7 @@ public class Editor {
 		lcc.gridwidth = 3;
 		lcc.gridheight = 3;
 		lcc.insets = pdg;
-		lc = new LevelCanvas(new Dimension(EDITOR_SIZE,EDITOR_SIZE), Color.BLACK, renderer);
+		lc = new LevelCanvas(this, new Dimension(EDITOR_SIZE,EDITOR_SIZE), Color.BLACK, renderer);
 		frame.add(lc, lcc);
 		
 		GridBagConstraints jbc = new GridBagConstraints();
@@ -68,5 +73,13 @@ public class Editor {
 	
 	public Level getActiveLevel() {
 		return activeLevel;
+	}
+
+	public void selectRoom(Room newSelection) {
+		if (selectedRoom != null)
+			selectedRoom.getRenderable().material.fill = null;
+		selectedRoom = newSelection;
+		if (selectedRoom != null)
+			selectedRoom.getRenderable().material.fill = Color.RED;
 	}
 }

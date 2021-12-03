@@ -98,15 +98,18 @@ public class Renderer {
 	private void drawElement(Graphics g, Renderable r) {
 		Material m = r.material;
 		Int2 pos = r.transform.position, scale = r.transform.scale;
+		Int2 hscale, ulpos;
 		switch (r.shape) {
 		case BOX:
+			hscale = new Int2(scale).div(2);
+			ulpos = new Int2(pos).sub(hscale);
 			if (m.fill != null) {
 				g.setColor(m.fill);
-				g.fillRect(pos.x, pos.y, scale.x, scale.y);
+				g.fillRect(ulpos.x, ulpos.y, scale.x, scale.y);
 			}
 			if (m.stroke != null) {
 				g.setColor(m.stroke);
-				g.drawRect(pos.x, pos.y, scale.x, scale.y);
+				g.drawRect(ulpos.x, ulpos.y, scale.x, scale.y);
 			}
 			break;
 		case LINE: // Fill not supported for LINE
@@ -116,13 +119,15 @@ public class Renderer {
 			}
 			break;
 		case OVAL:
+			hscale = new Int2(scale).div(2);
+			ulpos = new Int2(pos).sub(hscale);
 			if (m.fill != null) {
 				g.setColor(m.fill);
-				g.fillOval(pos.x, pos.y, scale.x, scale.y);
+				g.fillOval(ulpos.x, ulpos.y, scale.x, scale.y);
 			}
 			if (m.stroke != null) {
 				g.setColor(m.stroke);
-				g.drawOval(pos.x, pos.y, scale.x, scale.y);
+				g.drawOval(ulpos.x, ulpos.y, scale.x, scale.y);
 			}
 			break;
 		}

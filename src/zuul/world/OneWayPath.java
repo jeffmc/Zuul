@@ -33,12 +33,12 @@ public class OneWayPath extends Path {
 	}
 
 	@Override
-	public boolean potentionalToA() {
+	public boolean potentialToA() {
 		return false;
 	}
 
 	@Override
-	public boolean potentionalToB() {
+	public boolean potentialToB() {
 		return true;
 	}
 

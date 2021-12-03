@@ -17,12 +17,12 @@ public class TwoWayPath extends Path {
 	}
 
 	@Override
-	public boolean potentionalToA() {
+	public boolean potentialToA() {
 		return true;
 	}
 
 	@Override
-	public boolean potentionalToB() {
+	public boolean potentialToB() {
 		return true;
 	}
 

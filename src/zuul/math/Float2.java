@@ -26,7 +26,7 @@ public class Float2 {
 		this.y = o.y;
 	}
 	
-	public Float2 add(int x, int y) {
+	public Float2 add(float x, float y) {
 		this.x += x;
 		this.y += y;
 		return this;
@@ -40,7 +40,7 @@ public class Float2 {
 		return new Float2(a.x + b.x, a.y + b.y);
 	}
 
-	public Float2 sub(int x, int y) {
+	public Float2 sub(float x, float y) {
 		this.x -= x;
 		this.y -= y;
 		return this;
@@ -54,9 +54,14 @@ public class Float2 {
 		return new Float2(a.x - b.x, a.y - b.y);
 	}
 	
-	public Float2 mult(int x, int y) {
+	public Float2 mult(float x, float y) {
 		this.x *= x;
 		this.y *= y;
+		return this;
+	}
+	public Float2 mult(float f) {
+		this.x *= f;
+		this.y *= f;
 		return this;
 	}
 	public Float2 mult(Float2 o) {
@@ -68,9 +73,14 @@ public class Float2 {
 		return new Float2(a.x * b.x, a.y * b.y);
 	}
 
-	public Float2 div(int x, int y) {
+	public Float2 div(float x, float y) {
 		this.x /= x;
 		this.y /= y;
+		return this;
+	}
+	public Float2 div(float f) {
+		this.x /= f;
+		this.y /= f;
 		return this;
 	}
 	public Float2 div(Float2 o) {

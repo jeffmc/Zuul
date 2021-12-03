@@ -42,26 +42,22 @@ public abstract class Path {
 		return bName;
 	}
 
-	public abstract boolean potentionalToA();
+	public abstract boolean potentialToA();
 	
-	public abstract boolean potentionalToB();
+	public abstract boolean potentialToB();
 	
 	public abstract boolean accessToA(PlayerState ps);
-//		return b.getExits().values().contains(a);
 	
 	public abstract boolean accessToB(PlayerState ps);
-//		return a.getExits().values().contains(b);
 
 	public abstract PathType getType();
 	
 	public Renderable getRenderable() {
 		Room a = getA(), b = getB();
-		int ax = a.getX()+a.getWidth()/2, ay = a.getY()+a.getHeight()/2;
-		int bx = b.getX()+b.getWidth()/2, by = b.getY()+b.getHeight()/2;
 		return new Renderable(
 				Shape.LINE,
-				Material.stroke(this instanceof TwoWayPath?Color.GREEN:Color.YELLOW), // TODO: Update room material on select.
-				new IntTransform(new Int2(ax, ay), new Int2(bx, by)));
+				Material.stroke(this instanceof TwoWayPath?Color.GREEN:Color.YELLOW),
+				new IntTransform(a.getPosition(), b.getPosition()));
 	}
 	
 	public enum PathType {

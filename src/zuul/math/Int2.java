@@ -62,6 +62,11 @@ public class Int2 {
 		this.y *= y;
 		return this;
 	}
+	public Int2 mult(int f) {
+		this.x *= f;
+		this.y *= f;
+		return this;
+	}
 	public Int2 mult(Int2 o) {
 		x *= o.x;
 		y *= o.y;
@@ -74,6 +79,11 @@ public class Int2 {
 	public Int2 div(int x, int y) {
 		this.x /= x;
 		this.y /= y;
+		return this;
+	}
+	public Int2 div(int f) {
+		this.x /= f;
+		this.y /= f;
 		return this;
 	}
 	public Int2 div(Int2 o) {
