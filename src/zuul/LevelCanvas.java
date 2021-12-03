@@ -16,7 +16,7 @@ import zuul.world.Level;
 import zuul.world.Room;
 
 @SuppressWarnings("serial")
-public class LevelCanvas extends JPanel { // TODO: Eliminate all repaint in favor of drawing loop.
+public class LevelCanvas extends JPanel { // TODO: Eliminate all repaint calls in favor of drawing loop.
 
 	public enum DragType {
 		CAM_MOVE,
@@ -27,12 +27,14 @@ public class LevelCanvas extends JPanel { // TODO: Eliminate all repaint in favo
 	private Color background;
 	private Level activeLevel;
 
-	private Int2 camera, lastCamera;
-	private Point startDrag;
+	private Int2 camera, startCamera;
 	
 	private DragType dragType;
+	private Int2 startDrag;
+	
 	private Room movingRoom;
-	private Point startRoom;
+	private Int2 startRoom;
+	
 	private Renderer renderer;
 	
 	public LevelCanvas(Editor editor, Level level, Dimension size, Color background, Renderer renderer) {
@@ -45,7 +47,7 @@ public class LevelCanvas extends JPanel { // TODO: Eliminate all repaint in favo
 		this.setMaximumSize(size);
 		
 		camera = new Int2();
-		lastCamera = new Int2();
+		startCamera = new Int2();
 		setActiveLevel(level);
 		
 		dragType = null;
@@ -59,25 +61,18 @@ public class LevelCanvas extends JPanel { // TODO: Eliminate all repaint in favo
 			@Override
 			public void mouseDragged(MouseEvent e) {
 				if (dragType != null) {
-					Point nowDrag, delta;
+					Point los = e.getLocationOnScreen();
+					Int2 nowDrag = new Int2(los.x, los.y);
+					Int2 delta = new Int2(startDrag);
+					delta.x -= nowDrag.x;
+					delta.y -= nowDrag.y;
 					switch (dragType) {
 					case ROOM_MOVE:
-						nowDrag = e.getLocationOnScreen();
-						delta = new Point(startDrag);
-						delta.x -= nowDrag.x;
-						delta.y -= nowDrag.y;
-						movingRoom.setPosition(
-								startRoom.x - delta.x, 
-								startRoom.y - delta.y);
+						movingRoom.setPosition(Int2.sub(startRoom, delta));
 						repaint();
 						break;
 					case CAM_MOVE:
-						nowDrag = e.getLocationOnScreen();
-						delta = new Point(startDrag);
-						delta.x -= nowDrag.x;
-						delta.y -= nowDrag.y;
-						camera.x = lastCamera.x + delta.x;
-						camera.y = lastCamera.y + delta.y;
+						camera.set(Int2.add(startCamera, delta));
 						repaint();
 						break;
 					}
@@ -87,28 +82,21 @@ public class LevelCanvas extends JPanel { // TODO: Eliminate all repaint in favo
 		addMouseListener(new MouseListener() {
 			@Override
 			public void mouseReleased(MouseEvent e) {
-				Point endDrag, delta;
+				Point los = e.getLocationOnScreen();
+				Int2 endDrag = new Int2(los.x, los.y);
+				Int2 delta = new Int2(startDrag);
+				delta.x -= endDrag.x;
+				delta.y -= endDrag.y;
 				switch(e.getButton()) {
 				case MouseEvent.BUTTON1:
-					endDrag = e.getLocationOnScreen();
-					delta = new Point(startDrag);
-					delta.x -= endDrag.x;
-					delta.y -= endDrag.y;
 					if (movingRoom != null) {
-						movingRoom.setPosition(
-								startRoom.x - delta.x, 
-								startRoom.y - delta.y);
+						movingRoom.setPosition(Int2.sub(startRoom, delta));
 					}
 					dragType = null;
 					repaint();
 					break;
 				case MouseEvent.BUTTON2:
-					endDrag = e.getLocationOnScreen();
-					delta = new Point(startDrag);
-					delta.x -= endDrag.x;
-					delta.y -= endDrag.y;
-					camera.x = lastCamera.x + delta.x;
-					camera.y = lastCamera.y + delta.y;
+					camera.set(Int2.add(startCamera, delta));
 					dragType = null;
 					repaint();
 					break;
@@ -119,18 +107,18 @@ public class LevelCanvas extends JPanel { // TODO: Eliminate all repaint in favo
 			public void mousePressed(MouseEvent e) {
 				switch(e.getButton()) {
 				case MouseEvent.BUTTON1:
-					movingRoom = activeLevel.getRoom(
-							canvasCoordsToLevelCoords(e.getPoint()));
-					editor.selectRoom(movingRoom);
+					movingRoom = editor.selectRoom(canvasCoordsToLevelCoords(e.getPoint()));
 					if (movingRoom != null) {
-						startRoom = new Point(movingRoom.getX(),movingRoom.getY());
-						startDrag = e.getLocationOnScreen();
+						startRoom = new Int2(movingRoom.getPosition());
+						Point los = e.getLocationOnScreen();
+						startDrag = new Int2(los.x,los.y);
 						dragType = DragType.ROOM_MOVE;
 					}
 					break;
 				case MouseEvent.BUTTON2:
-					lastCamera.set(camera);
-					startDrag = e.getLocationOnScreen();
+					startCamera.set(camera);
+					Point los = e.getLocationOnScreen();
+					startDrag = new Int2(los.x,los.y);
 					dragType = DragType.CAM_MOVE;
 					break;
 				}

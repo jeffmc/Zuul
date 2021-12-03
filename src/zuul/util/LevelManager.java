@@ -23,8 +23,7 @@ import zuul.world.TwoWayPath;
 
 public class LevelManager {
 
-	// TODO: Serialize paths instead of exits
-	// TODO: Add CSV color scalar
+	// TODO: Add CSV color scalar, similar to Int2 and IntTransform
 	
 	// https://github.com/decorators-squad/eo-yaml/wiki/Block-Style-YAML
     public static void save(Level l, File f) {
@@ -157,7 +156,6 @@ public class LevelManager {
 	    	
 	    	for (Room r : level.getRooms())
 				r.calcExits();
-	    	System.out.println(level.getPaths().size() + " total paths!");
 			level.completedLoading();
 			return level;
 		} catch (IOException e) {

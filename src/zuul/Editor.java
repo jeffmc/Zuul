@@ -9,6 +9,7 @@ import java.awt.Insets;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 
+import zuul.math.Int2;
 import zuul.renderer.Renderer;
 import zuul.world.Level;
 import zuul.world.Room;
@@ -25,7 +26,7 @@ public class Editor {
 	
 	private static final int EDITOR_SIZE = 768;
 	
-	public Editor() {
+	public Editor(Level activeLevel) {
 		frame = new JFrame("Zuul Editor");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setResizable(true);
@@ -35,7 +36,12 @@ public class Editor {
 		makeGui();
 		frame.pack();
 		
+		setActiveLevel(activeLevel);
 		selectedRoom = null;
+	}
+	
+	public Editor() {
+		this(null);
 	}
 	
 	private void makeGui() {
@@ -75,11 +81,15 @@ public class Editor {
 		return activeLevel;
 	}
 
-	public void selectRoom(Room newSelection) {
+	public Room selectRoom(Room newSelection) {
 		if (selectedRoom != null)
 			selectedRoom.getRenderable().material.fill = null;
 		selectedRoom = newSelection;
 		if (selectedRoom != null)
 			selectedRoom.getRenderable().material.fill = Color.RED;
+		return selectedRoom;
+	}
+	public Room selectRoom(Int2 worldCoords) {
+		return selectRoom(activeLevel.getRoom(worldCoords));
 	}
 }

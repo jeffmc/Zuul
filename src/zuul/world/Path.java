@@ -2,7 +2,6 @@ package zuul.world;
 
 import java.awt.Color;
 
-import zuul.math.Int2;
 import zuul.math.IntTransform;
 import zuul.renderer.Material;
 import zuul.renderer.Renderable;
@@ -10,9 +9,9 @@ import zuul.renderer.Renderable.Shape;
 
 public abstract class Path {
 	// Serialized fields
+	// getType() is also serialized.
 	private Room a, b;
 	private String aName, bName;
-	// TYPE WILL BE SERIALIZED TOO.
 	
 	// TODO: Add conditional paths (based on player inventory, explored paths/rooms, etc.)
 	public Path(Room _a, Room _b, String _aName, String _bName) {
