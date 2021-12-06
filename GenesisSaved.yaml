@@ -31,15 +31,21 @@ Paths:
   -
     Type: TWO_WAY
     A: Outside
-    B: Lab
-    AName: south
-    BName: north
-  -
-    Type: TWO_WAY
-    A: Outside
     B: Pub
     AName: west
     BName: east
+  -
+    Type: ONE_WAY
+    Parent: Office
+    Child: Outside
+    IsBlind: true
+    ParentName: ladder
+  -
+    Type: TWO_WAY
+    A: Outside
+    B: Theatre
+    AName: east
+    BName: west
   -
     Type: TWO_WAY
     A: Lab
@@ -48,25 +54,19 @@ Paths:
     BName: west
   -
     Type: ONE_WAY
-    Parent: Vault
-    Child: Pub
-    IsBlind: true
-    ParentName: hatch
-  -
-    Type: ONE_WAY
     Parent: Office
     Child: Theatre
     IsBlind: true
     ParentName: tunnel
   -
+    Type: ONE_WAY
+    Parent: Vault
+    Child: Pub
+    IsBlind: true
+    ParentName: hatch
+  -
     Type: TWO_WAY
     A: Outside
-    B: Theatre
-    AName: east
-    BName: west
-  -
-    Type: ONE_WAY
-    Parent: Office
-    Child: Outside
-    IsBlind: true
-    ParentName: ladder
+    B: Lab
+    AName: south
+    BName: north

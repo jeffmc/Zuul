@@ -11,6 +11,7 @@ import java.awt.event.MouseMotionListener;
 import javax.swing.JPanel;
 
 import zuul.math.Int2;
+import zuul.math.IntTransform;
 import zuul.renderer.Renderer;
 import zuul.world.Level;
 import zuul.world.Room;
@@ -53,10 +54,7 @@ public class LevelCanvas extends JPanel { // TODO: Eliminate all repaint calls i
 		dragType = null;
 		// TODO: Refactor all mouse input into own class
 		addMouseMotionListener(new MouseMotionListener() {
-			@Override
-			public void mouseMoved(MouseEvent e) {
-				
-			}
+			@Override public void mouseMoved(MouseEvent e) { }
 			
 			@Override
 			public void mouseDragged(MouseEvent e) {
@@ -124,20 +122,9 @@ public class LevelCanvas extends JPanel { // TODO: Eliminate all repaint calls i
 				}
 			}
 			
-			@Override
-			public void mouseExited(MouseEvent e) { 
-				
-			}
-			
-			@Override
-			public void mouseEntered(MouseEvent e) {
-				
-			}
-			
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				
-			}
+			@Override public void mouseExited(MouseEvent e) {  }
+			@Override public void mouseEntered(MouseEvent e) { }
+			@Override public void mouseClicked(MouseEvent e) { }
 		});
 	}
 	
@@ -162,9 +149,8 @@ public class LevelCanvas extends JPanel { // TODO: Eliminate all repaint calls i
 		activeLevel = l;
 		if (l != null) {
 			// Center camera at spawn room
-			Room s = activeLevel.getSpawn();
-			camera.set(s.getX()+s.getWidth()/2,
-					s.getY()+s.getHeight()/2);
+			Int2 spawn = activeLevel.getSpawn().getPosition();
+			camera.set(spawn.x, spawn.y);
 			renderer.setRenderables(l.getRenderables());
 		} else {
 			camera.set(0, 0);

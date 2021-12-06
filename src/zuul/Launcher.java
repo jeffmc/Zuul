@@ -2,6 +2,8 @@ package zuul;
 
 import java.io.File;
 
+import mcmillan.ecs.ECS;
+import mcmillan.ecs.TagComponent;
 import zuul.math.IntTransform;
 import zuul.util.LevelManager;
 import zuul.world.Level;
@@ -18,6 +20,15 @@ public class Launcher {
 //	private static LevelState ls; TODO: Add levelState, to check if items have been picked up.
 	
 	public static void main(String args[]) {
+		
+		ECS ecs = new ECS("Zuul");
+		long e = ecs.newEntity("Example Tag");
+		TagComponent tag = ecs.getComponent(TagComponent.class, e);
+//		TagComponent tag = ecs.addComponent(TagComponent.class, e,  "Invalid Tag");
+		boolean test = ecs.hasComponent(TagComponent.class, e);
+		System.out.println(test);
+		System.out.println(tag.tag);
+		
 		level = LevelManager.load(new File("GenesisReadOnly.yaml"));
 		LevelManager.save(level);
 		
