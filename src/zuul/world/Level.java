@@ -7,7 +7,6 @@ import java.util.Set;
 
 import zuul.math.Int2;
 import zuul.renderer.Renderable;
-import zuul.util.Signal;
 
 public class Level {
 	// Serialized

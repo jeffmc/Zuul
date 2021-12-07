@@ -1,6 +1,8 @@
 package mcmillan.ecs;
 
 import java.lang.reflect.Constructor;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -32,15 +34,12 @@ public final class ECS {
 		entityComponentMap = new HashMap<Long, Set<Component>>();
 	}
 	
-	public long newEntity(String tag) {
+	public long newEntity() {
 		Long e = random.nextLong(); // Generate entity
 		entityComponentMap.put(e, new HashSet<>()); // Generate component map for entity
 		if (!entities.add(e)) throw new IllegalStateException("ECS RANDOMLY GENERATED SAME LONG TWICE!"); // Add entity to entity set
-		addComponent(TagComponent.class, e, tag == null ? "Entity" : tag.isBlank() ? "Entity" : tag); // Add tag component to entity
 		return e; // Return new entity.
 	}
-	
-	public long newEntity() { return newEntity(null); }
 
 	public boolean hasComponent(Class<? extends Component> comp, long entity) {
 		Set<Component> eComps = entityComponentMap.get(entity); // Get all components in entity.
@@ -124,10 +123,15 @@ public final class ECS {
 		
 		private ECS ecs;
 		public ECS getECS() { return ecs; }
+		
 		private Class<? extends Component>[] componentTypes;
+		public Class<? extends Component>[] getComponentTypes() { return componentTypes; }
 		
 		private Set<Long> entities;
+		
 		private Map<Long, Component[]> results;
+		public Map<Long, Component[]> getResults() { return Collections.unmodifiableMap(results); }
+		public Collection<Component[]> getComponents() { return Collections.unmodifiableCollection(results.values()); }
 		
 		public View(ECS ecs, Class<? extends Component>[] componentTypes) { // TODO: Add caching
 			if (componentTypes == null) throw new IllegalArgumentException("Parameter componentTypes is null!");
@@ -161,12 +165,13 @@ public final class ECS {
 				});
 			}
 		}
-	}
-	public void runTest() {
-		System.out.println("ECS TEST:");
-		for (Entry<Long, Set<Component>> e : entityComponentMap.entrySet()) 
-			System.out.println(getComponentOrNull(TagComponent.class, e.getKey()).tag);
-		System.out.println();
 		
+		public void print() {
+			for (Entry<Long, Component[]> e : results.entrySet()) {
+				System.out.println(e.getKey() + ":");
+				for (Component c : e.getValue())
+					System.out.println("  " + c.toString());
+			}
+		}
 	}
 }

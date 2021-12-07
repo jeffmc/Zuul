@@ -18,7 +18,7 @@ import zuul.world.Level;
 import zuul.world.Room;
 
 @SuppressWarnings("serial")
-public class LevelCanvas extends JPanel { // TODO: Eliminate all repaint calls in favor of drawing loop.
+public class EditorCanvas extends JPanel { // TODO: Eliminate all repaint calls in favor of drawing loop.
 
 	public enum DragType {
 		CAM_MOVE,
@@ -40,7 +40,7 @@ public class LevelCanvas extends JPanel { // TODO: Eliminate all repaint calls i
 	
 	private Renderer renderer;
 	
-	public LevelCanvas(Editor editor, Scene scene, Dimension size, Color background, Renderer renderer) {
+	public EditorCanvas(Editor editor, Scene scene, Dimension size, Color background, Renderer renderer) {
 		super();
 		this.editor = editor;
 		this.background = background;
@@ -130,7 +130,7 @@ public class LevelCanvas extends JPanel { // TODO: Eliminate all repaint calls i
 		});
 	}
 	
-	public LevelCanvas(Editor editor, Dimension size, Color background, Renderer renderer) {
+	public EditorCanvas(Editor editor, Dimension size, Color background, Renderer renderer) {
 		this(editor, null, size, background, renderer);
 	}
 	
