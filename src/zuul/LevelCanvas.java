@@ -13,6 +13,7 @@ import javax.swing.JPanel;
 import zuul.math.Int2;
 import zuul.math.IntTransform;
 import zuul.renderer.Renderer;
+import zuul.scene.Scene;
 import zuul.world.Level;
 import zuul.world.Room;
 
@@ -26,7 +27,8 @@ public class LevelCanvas extends JPanel { // TODO: Eliminate all repaint calls i
 
 	private Editor editor;
 	private Color background;
-	private Level activeLevel;
+//	private Level activeLevel; TODO: Remove altogether
+	private Scene activeScene;
 
 	private Int2 camera, startCamera;
 	
@@ -38,7 +40,7 @@ public class LevelCanvas extends JPanel { // TODO: Eliminate all repaint calls i
 	
 	private Renderer renderer;
 	
-	public LevelCanvas(Editor editor, Level level, Dimension size, Color background, Renderer renderer) {
+	public LevelCanvas(Editor editor, Scene scene, Dimension size, Color background, Renderer renderer) {
 		super();
 		this.editor = editor;
 		this.background = background;
@@ -49,7 +51,7 @@ public class LevelCanvas extends JPanel { // TODO: Eliminate all repaint calls i
 		
 		camera = new Int2();
 		startCamera = new Int2();
-		setActiveLevel(level);
+		setActiveScene(scene);
 		
 		dragType = null;
 		// TODO: Refactor all mouse input into own class
@@ -87,11 +89,11 @@ public class LevelCanvas extends JPanel { // TODO: Eliminate all repaint calls i
 				delta.y -= endDrag.y;
 				switch(e.getButton()) {
 				case MouseEvent.BUTTON1:
-					if (movingRoom != null) {
-						movingRoom.setPosition(Int2.sub(startRoom, delta));
-					}
-					dragType = null;
-					repaint();
+//					if (movingRoom != null) { TODO: Gizmos
+//						movingRoom.setPosition(Int2.sub(startRoom, delta));
+//					}
+//					dragType = null;
+//					repaint();
 					break;
 				case MouseEvent.BUTTON2:
 					camera.set(Int2.add(startCamera, delta));
@@ -105,13 +107,13 @@ public class LevelCanvas extends JPanel { // TODO: Eliminate all repaint calls i
 			public void mousePressed(MouseEvent e) {
 				switch(e.getButton()) {
 				case MouseEvent.BUTTON1:
-					movingRoom = editor.selectRoom(canvasCoordsToLevelCoords(e.getPoint()));
-					if (movingRoom != null) {
-						startRoom = new Int2(movingRoom.getPosition());
-						Point los = e.getLocationOnScreen();
-						startDrag = new Int2(los.x,los.y);
-						dragType = DragType.ROOM_MOVE;
-					}
+//					movingRoom = editor.selectRoom(canvasCoordsToLevelCoords(e.getPoint())); TODO: Make gizmos
+//					if (movingRoom != null) {
+//						startRoom = new Int2(movingRoom.getPosition());
+//						Point los = e.getLocationOnScreen();
+//						startDrag = new Int2(los.x,los.y);
+//						dragType = DragType.ROOM_MOVE;
+//					}
 					break;
 				case MouseEvent.BUTTON2:
 					startCamera.set(camera);
@@ -145,16 +147,26 @@ public class LevelCanvas extends JPanel { // TODO: Eliminate all repaint calls i
 		return lvl;
 	}
 
-	public void setActiveLevel(Level l) {
-		activeLevel = l;
-		if (l != null) {
-			// Center camera at spawn room
-			Int2 spawn = activeLevel.getSpawn().getPosition();
-			camera.set(spawn.x, spawn.y);
-			renderer.setRenderables(l.getRenderables());
-		} else {
-			camera.set(0, 0);
+//	@Deprecated
+//	public void setActiveLevel(Level l) {
+//		activeLevel = l;
+//		if (l != null) {
+//			// Center camera at spawn room
+//			Int2 spawn = activeLevel.getSpawn().getPosition();
+//			camera.set(spawn.x, spawn.y);
+//			renderer.setRenderables(l.getRenderables());
+//		} else {
+//			camera.set(0, 0);
+//		}
+//		repaint();
+//	}
+	
+	public void setActiveScene(Scene scene) {
+		activeScene = scene;
+		if (scene != null) {
+			renderer.setActiveScene(scene);
 		}
+		camera.set(0,0);
 		repaint();
 	}
 	

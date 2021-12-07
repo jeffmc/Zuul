@@ -11,22 +11,24 @@ import javax.swing.JFrame;
 
 import zuul.math.Int2;
 import zuul.renderer.Renderer;
+import zuul.scene.Scene;
 import zuul.world.Level;
 import zuul.world.Room;
 
 public class Editor {
 	private JFrame frame;
 	
-	private Level activeLevel;
 	private LevelCanvas lc;
 	
 	private Renderer renderer;
 	
-	private Room selectedRoom;
+//	private Room selectedRoom; TODO: replace with selectedEntity
+	
+	private Scene activeScene;
 	
 	private static final int EDITOR_SIZE = 768;
 	
-	public Editor(Level activeLevel) {
+	public Editor(Scene scene) {
 		frame = new JFrame("Zuul Editor");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setResizable(true);
@@ -36,8 +38,8 @@ public class Editor {
 		makeGui();
 		frame.pack();
 		
-		setActiveLevel(activeLevel);
-		selectedRoom = null;
+		setActiveScene(scene);
+//		selectedRoom = null;
 	}
 	
 	public Editor() {
@@ -64,7 +66,7 @@ public class Editor {
 		jbc.fill = GridBagConstraints.BOTH;
 		jbc.insets = pdg;
 		JButton jb = new JButton("Test button");
-		frame.add(jb, jbc);
+//		frame.add(jb, jbc);
 	}
 	
 	public void start() {
@@ -72,24 +74,28 @@ public class Editor {
 		frame.setVisible(true);
 	}
 	
-	public void setActiveLevel(Level l) {
-		lc.setActiveLevel(l);
-		activeLevel = l;
-	}
+//	@Deprecated
+//	public void setActiveLevel(Level l) {
+//		lc.setActiveLevel(l);
+//		activeLevel = l;
+//	}
+//	public Level getActiveLevel() { return activeLevel; }
 	
-	public Level getActiveLevel() {
-		return activeLevel;
+	public void setActiveScene(Scene scene) {
+		lc.setActiveScene(scene);
+		activeScene = scene;
 	}
+	public Scene getActiveScene() { return activeScene; }
 
-	public Room selectRoom(Room newSelection) {
-		if (selectedRoom != null)
-			selectedRoom.getRenderable().material.fill = null;
-		selectedRoom = newSelection;
-		if (selectedRoom != null)
-			selectedRoom.getRenderable().material.fill = Color.RED;
-		return selectedRoom;
-	}
-	public Room selectRoom(Int2 worldCoords) {
-		return selectRoom(activeLevel.getRoom(worldCoords));
-	}
+//	public Room selectRoom(Room newSelection) { TODO: Replace w/ selected entity
+//		if (selectedRoom != null)
+//			selectedRoom.getRenderable().material.fill = null;
+//		selectedRoom = newSelection;
+//		if (selectedRoom != null)
+//			selectedRoom.getRenderable().material.fill = Color.RED;
+//		return selectedRoom;
+//	}
+//	public Room selectRoom(Int2 worldCoords) { 
+//		return selectRoom(activeLevel.getRoom(worldCoords));
+//	}
 }

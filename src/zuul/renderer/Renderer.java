@@ -3,28 +3,26 @@ package zuul.renderer;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Rectangle;
-import java.util.Set;
 
 import zuul.math.Int2;
+import zuul.scene.Scene;
 
 public class Renderer {
 	
-	public Set<Renderable> renderables;
-//	private Map<Renderable.Shape, Set<Renderable>> elementsByShape;
 	private Rectangle bounds;
+	
+	private Scene activeScene;
 	
 //	 TODO: ADD TEXT SUPPORT TO NEW RENDERER!
 	public Renderer() {
-		renderables = null;
-//		elements = new HashSet<>();
-//		elementsByShape = new HashMap<>();
-//		for (Renderable.Shape s : Renderable.Shape.values())
-//			elementsByShape.put(s, new HashSet<>());
+		activeScene = null;
 	}
 	
-	public void setRenderables(Set<Renderable> renderables) { // TODO: Run this function better, implement the transform into Room object so that it correctly updates.
-		this.renderables = renderables;
+	public void setActiveScene(Scene scene) {
+		activeScene = scene;
 	}
+	
+	public Scene getActiveScene() { return activeScene; }
 	
 	public void drawElements(Graphics g, Color bg, Int2 camera) {
 		// Get canvas bounds
@@ -38,14 +36,14 @@ public class Renderer {
 		g.setColor(Color.white);
 		g.fillRect(bounds.width/2-2, bounds.height/2-2, 4, 4);
 		
+		g.drawString(camera.toString(), 5, bounds.height-5); // Draw camera position in bottom-left corner.
 		// Center canvas at camera coords TODO: Add camera zoom
 		centerAt(g, camera);
 		
-		if (renderables != null)
-			for (Renderable e : renderables) 
-				drawElement(g, e);
+		// TODO: RenderScene
 		
 	}
+	
 	
 	private void drawElement(Graphics g, Renderable r) {
 		Material m = r.material;
@@ -86,10 +84,6 @@ public class Renderer {
 	}
 	
 //	public void submit(Renderable r) {
-//		elements.add(r);
-//		Set<Renderable> byShape = elementsByShape.get(r.shape);
-//		if (byShape == null) throw new IllegalArgumentException("Shape renderable set not found in elementsByShape map!");
-//		byShape.add(r);
 //	}
 	
 	private void centerAt(Graphics g, Int2 center) {

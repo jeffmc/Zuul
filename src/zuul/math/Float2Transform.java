@@ -1,19 +1,19 @@
 package zuul.math;
 
-public class FloatTransform {
+public class Float2Transform {
 	public Float2 position, scale;
 	
-	public FloatTransform(Float2 position, Float2 scale) {
+	public Float2Transform(Float2 position, Float2 scale) {
 		this.position = position;
 		this.scale = scale;
 	}
 
-	public FloatTransform(float x, float y, float w, float h) {
+	public Float2Transform(float x, float y, float w, float h) {
 		this.position = new Float2(x,y);
 		this.scale = new Float2(w,h);
 	}
 	
-	public FloatTransform(Float2 position) {
+	public Float2Transform(Float2 position) {
 		this(position, new Float2());
 	}
 	

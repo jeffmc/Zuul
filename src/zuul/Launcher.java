@@ -5,6 +5,7 @@ import java.io.File;
 import mcmillan.ecs.ECS;
 import mcmillan.ecs.TagComponent;
 import zuul.math.IntTransform;
+import zuul.scene.Scene;
 import zuul.util.LevelManager;
 import zuul.world.Level;
 import zuul.world.Room;
@@ -32,7 +33,9 @@ public class Launcher {
 		level = LevelManager.load(new File("GenesisReadOnly.yaml"));
 		LevelManager.save(level);
 		
-		editor = new Editor(level);
+		editor = new Editor();
+		Scene scene = Scene.levelToScene(level);
+		editor.setActiveScene(scene);
 		editor.start();
 		
 		if (level != null) {
