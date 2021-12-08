@@ -70,4 +70,16 @@ public class RenderCommand {
 			throw new IllegalArgumentException(e);
 		}
 	}
+	
+
+	public static RenderCommand centerAt(Int2 center, Int2 viewport) {
+		try {
+			Method m = gfxcls.getMethod("translate", int.class, int.class);
+			return new RenderCommand(m,
+					-center.x+viewport.x/2,
+					-center.y+viewport.y/2);
+		} catch (NoSuchMethodException | SecurityException e) {
+			throw new IllegalArgumentException(e);
+		}
+	}
 }

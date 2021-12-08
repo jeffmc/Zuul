@@ -1,33 +1,32 @@
 package zuul;
 
-import java.awt.Color;
+import java.awt.Canvas;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.image.BufferStrategy;
 
-import javax.swing.JPanel;
+import javax.swing.JFrame;
 
 import zuul.math.Int2;
-import zuul.math.IntTransform;
 import zuul.renderer.Renderer;
 import zuul.scene.Scene;
-import zuul.world.Level;
 import zuul.world.Room;
 
 @SuppressWarnings("serial")
-public class EditorCanvas extends JPanel { // TODO: Eliminate all repaint calls in favor of drawing loop.
+public class EditorFrame extends JFrame {
 
 	public enum DragType {
 		CAM_MOVE,
 		ROOM_MOVE,
 	}
 
-	private Editor editor;
-	private Color background;
-//	private Level activeLevel; TODO: Remove altogether
+	private Canvas canvas;
+	private BufferStrategy bufferStrategy;
+	
 	private Scene activeScene;
 
 	private Int2 camera, startCamera;
@@ -38,24 +37,34 @@ public class EditorCanvas extends JPanel { // TODO: Eliminate all repaint calls 
 	private Room movingRoom;
 	private Int2 startRoom;
 	
-	private Renderer renderer;
-	
-	public EditorCanvas(Editor editor, Scene scene, Dimension size, Color background, Renderer renderer) {
-		super();
-		this.editor = editor;
-		this.background = background;
-		this.renderer = renderer;
-		this.setMinimumSize(size);
-		this.setPreferredSize(size);
-		this.setMaximumSize(size);
+	public EditorFrame(Scene scene) {
+		super("Zuul Editor");
+		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		this.setResizable(true);
+		this.setIgnoreRepaint(true);
+		
+		setupCanvas(new Dimension(SceneEditor.EDITOR_SIZE,SceneEditor.EDITOR_SIZE));
+		this.add(canvas);
 		
 		camera = new Int2();
 		startCamera = new Int2();
 		setActiveScene(scene);
 		
+		setupDragging();
+	}
+	
+	private void setupCanvas(Dimension size) {
+		canvas = new Canvas();
+		setMinimumSize(size);
+		setPreferredSize(size);
+		setMaximumSize(size);
+	}
+	
+	
+	private void setupDragging() {
 		dragType = null;
 		// TODO: Refactor all mouse input into own class
-		addMouseMotionListener(new MouseMotionListener() {
+		canvas.addMouseMotionListener(new MouseMotionListener() {
 			@Override public void mouseMoved(MouseEvent e) { }
 			
 			@Override
@@ -79,7 +88,7 @@ public class EditorCanvas extends JPanel { // TODO: Eliminate all repaint calls 
 				}
 			}
 		});
-		addMouseListener(new MouseListener() {
+		canvas.addMouseListener(new MouseListener() {
 			@Override
 			public void mouseReleased(MouseEvent e) {
 				Point los = e.getLocationOnScreen();
@@ -130,16 +139,51 @@ public class EditorCanvas extends JPanel { // TODO: Eliminate all repaint calls 
 		});
 	}
 	
-	public EditorCanvas(Editor editor, Dimension size, Color background, Renderer renderer) {
-		this(editor, null, size, background, renderer);
+	public EditorFrame() {
+		this(null);
 	}
 	
-	@Override
-	public void paintComponent(Graphics g) {
-		super.paintComponent(g);
-		renderer.drawElements(g, background, camera);
+	public void start() {
+		// Get bufferStrat
+ 		pack(); // necessary to validate components for buffer functions below
+		canvas.createBufferStrategy(2);
+		bufferStrategy = canvas.getBufferStrategy();
+		
+		// Set visible in center of screen
+		setLocationRelativeTo(null);
+		setVisible(true);
+		
+		// Begin game loop
+		long lastTime = System.currentTimeMillis();
+		while (true) { // TODO: Make a better framerate-locked loop (LayerStack in Application?)
+			try {
+				Thread.sleep(16);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			long time = System.currentTimeMillis();
+			long delta = time - lastTime;
+			lastTime = time;
+//			System.out.println("EditorFrame: frameTime: " + delta + "ms");
+			this.repaint();
+		}
 	}
-
+	
+	
+	@Override
+	public void paint(Graphics g) {
+		bufferStrategy.show();
+		Graphics gg = bufferStrategy.getDrawGraphics();
+		if (gg != null) {
+			int vw = Renderer.viewportWidth(), vh = Renderer.viewportHeight();
+			gg.fillRect(0, 0, vw, vh);
+			activeScene.render(camera);
+			activeScene.draw(gg);
+			gg.dispose();
+			bufferStrategy.show();
+		}
+	}
+	
 	private Int2 canvasCoordsToLevelCoords(Point canvas) {
 		Int2 lvl = new Int2(camera);
 		lvl.x -= getWidth()/2-canvas.x;
@@ -163,15 +207,7 @@ public class EditorCanvas extends JPanel { // TODO: Eliminate all repaint calls 
 	
 	public void setActiveScene(Scene scene) {
 		activeScene = scene;
-		if (scene != null) {
-			renderer.setActiveScene(scene);
-		}
 		camera.set(0,0);
-		repaint();
-	}
-	
-	public void setBackground(Color c) {
-		background = c;
 		repaint();
 	}
 	

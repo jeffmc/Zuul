@@ -1,81 +1,51 @@
 package zuul.renderer;
 
-import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.List;
 
+import zuul.SceneEditor;
 import zuul.math.Int2;
-import zuul.math.IntTransform;
-import zuul.scene.Scene;
 
-public class Renderer { // TODO: Make static
+public abstract class Renderer {
 	
-	private Rectangle bounds;
+	private static int viewportWidth = SceneEditor.EDITOR_SIZE, viewportHeight = SceneEditor.EDITOR_SIZE;
 	
-	private Scene activeScene;
-	
-	private List<RenderCommand> renderCommands;
+	private static List<RenderCommand> renderCommands = new ArrayList<>();
 	
 //	 TODO: ADD TEXT SUPPORT TO NEW RENDERER!
-	public Renderer() {
-		activeScene = null;
-		renderCommands = new ArrayList<>();
+	
+	// Frame methods and fields
+	private static boolean frameClosed = true;
+	
+	public static void beginFrame() {
+		frameClosed = false;
+		if (renderCommands != null) {
+			renderCommands.clear();
+		} else {
+			renderCommands = new ArrayList<>();
+		}
 	}
 	
-	public void beginFrame() {
-		renderCommands.clear();
+	public static void endFrame() {
+		frameClosed = true;
 	}
 	
-	public void endFrame() {
-		
-	}
-	
-	public void drawFrame(Graphics g) {
+	public static void drawFrame(Graphics g) {
+		if (!frameClosed) System.err.println("Renderer: drawFrame called before frameClosed == true!");
 		for (RenderCommand cmd : renderCommands)
 			cmd.fire(g);
 	}
 	
-	public void addCmd(RenderCommand cmd) { renderCommands.add(cmd); }
-	
-	public void setActiveScene(Scene scene) {
-		activeScene = scene;
-	}
-	
-	public Scene getActiveScene() { return activeScene; }
-	
-	public void drawElements(Graphics g, Color bg, Int2 camera) {
-		// Get canvas bounds
-		bounds = g.getClipBounds();
-		
-		// Fill background with background color specified in constructor.
-		g.setColor(bg);
-		g.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
+	// Submit a Graphics command
+	public static void submit(RenderCommand cmd) { if (!frameClosed) renderCommands.add(cmd); }
 
-		// Draw 4x4 white rect at center of board, mostly for debugging
-		g.setColor(Color.white);
-		g.fillRect(bounds.width/2-2, bounds.height/2-2, 4, 4);
-		
-		
-		beginFrame();
-		addCmd(RenderCommand.setColor(Color.WHITE));
-		addCmd(RenderCommand.drawString(camera.toString(), new Int2(5, bounds.height-5))); // Draw camera position in bottom-left corner.
-		
-		addCmd(RenderCommand.setColor(new Color(255,0,0)));
-		addCmd(RenderCommand.fillRect(new IntTransform(10, 20, 50, 30)));
-		addCmd(RenderCommand.setColor(new Color(0,255,0)));
-		addCmd(RenderCommand.drawRect(new IntTransform(10, 20, 50, 30)));
-		endFrame();
-		drawFrame(g);
-		
-		// Center canvas at camera coords TODO: Add camera zoom
-		centerAt(g, camera);
-		
-		activeScene.draw(g);
-		
-	}
-
+	// Viewport methods
+	public static void setViewport(int width, int height) { viewportWidth = width; viewportHeight = height; }
+	public static int viewportWidth() { return viewportWidth; }
+	public static int viewportHeight() { return viewportHeight; }
+	
+	// Weird debugger methods
 	public static String absoluteTrace(int stackTraceOffset) { 
 		return methodName(1+stackTraceOffset) + "(" + fileName(1+stackTraceOffset) + ":" + lineNumber(1+stackTraceOffset) + ")"; }
 	public static String absoluteTrace() { return absoluteTrace(1); }
@@ -92,6 +62,7 @@ public class Renderer { // TODO: Make static
 		return Thread.currentThread().getStackTrace()[2+stackTraceOffset].getLineNumber(); }
 	public static int lineNumber() { return lineNumber(1); }
 	
+	// Old methods
 	@Deprecated
 	@SuppressWarnings("unused")
 	private void drawElement(Graphics g, Renderable r) {
@@ -130,12 +101,5 @@ public class Renderer { // TODO: Make static
 			}
 			break;
 		}
-	}
-	
-//	public void submit(Renderable r) {
-//	}
-	
-	private void centerAt(Graphics g, Int2 center) {
-		g.translate(-center.x+bounds.width/2,-center.y+bounds.height/2);
 	}
 }

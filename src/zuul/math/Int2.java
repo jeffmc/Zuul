@@ -8,9 +8,10 @@ public class Int2 {
 		this.x = x;
 		this.y = y;
 	}
+	// Init to (0,0)
 	public Int2() {
-		this.x = 1;
-		this.y = 1;
+		this.x = 0;
+		this.y = 0;
 	}
 	public Int2(Int2 o) {
 		this.x = o.x;

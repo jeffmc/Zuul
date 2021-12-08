@@ -13,7 +13,7 @@ import zuul.world.Room;
 
 public class Launcher {
 	
-	private static Editor editor;
+	private static SceneEditor editor;
 	private static Game instance;
 	private static Level level;
 //	private static LevelState ls; TODO: Add levelState, to check if items have been picked up.
@@ -22,7 +22,7 @@ public class Launcher {
 		level = LevelManager.load(new File("GenesisReadOnly.yaml"));
 		LevelManager.save(level);
 		
-		editor = new Editor();
+		editor = new SceneEditor();
 		Scene scene = Scene.levelToScene(level);
 		editor.setActiveScene(scene);
 		editor.start();
