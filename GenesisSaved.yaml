@@ -23,17 +23,41 @@ Rooms:
     Transform: "[(320, 260) & (30, 30)]"
 Paths:
   -
-    Type: ONE_WAY
-    Parent: Office
-    Child: Outside
-    IsBlind: true
-    ParentName: ladder
+    Type: TWO_WAY
+    A: Office
+    B: Vault
+    AName: lock
+    BName: door
   -
     Type: ONE_WAY
     Parent: Office
     Child: Theatre
     IsBlind: true
     ParentName: tunnel
+  -
+    Type: TWO_WAY
+    A: Outside
+    B: Lab
+    AName: south
+    BName: north
+  -
+    Type: ONE_WAY
+    Parent: Office
+    Child: Outside
+    IsBlind: true
+    ParentName: ladder
+  -
+    Type: TWO_WAY
+    A: Outside
+    B: Theatre
+    AName: east
+    BName: west
+  -
+    Type: ONE_WAY
+    Parent: Vault
+    Child: Pub
+    IsBlind: true
+    ParentName: hatch
   -
     Type: TWO_WAY
     A: Lab
@@ -46,27 +70,3 @@ Paths:
     B: Pub
     AName: west
     BName: east
-  -
-    Type: TWO_WAY
-    A: Outside
-    B: Lab
-    AName: south
-    BName: north
-  -
-    Type: TWO_WAY
-    A: Office
-    B: Vault
-    AName: lock
-    BName: door
-  -
-    Type: ONE_WAY
-    Parent: Vault
-    Child: Pub
-    IsBlind: true
-    ParentName: hatch
-  -
-    Type: TWO_WAY
-    A: Outside
-    B: Theatre
-    AName: east
-    BName: west

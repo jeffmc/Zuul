@@ -1,5 +1,4 @@
 package zuul.world;
-import java.awt.Color;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -8,8 +7,6 @@ import java.util.Set;
 
 import zuul.math.Int2;
 import zuul.math.IntTransform;
-import zuul.renderer.Material;
-import zuul.renderer.Renderable;
 
 /*
  * Class Room - a room in an adventure game.
@@ -33,10 +30,9 @@ public class Room {
 	private IntTransform transform; // position and size (used by reference in renderer.)
 	
 	// Not-serialized
-	private Renderable.Shape shape = Renderable.Shape.BOX;
-	private Level level; // The parent level
+//	private Renderable.Shape shape = Renderable.Shape.BOX; TODO: Reimplement shape
+ 	private Level level; // The parent level
 	private Set<Path> paths; // Contains connections to neighbors
-	private Renderable renderable; // Render object used by reference in Renderer.
 	
 	/**
 	 * Create a room described "description". Initially, it has no exits.
@@ -72,20 +68,6 @@ public class Room {
 				((!isa)&&p.potentialToA())) 
 					this.exits.put(isa?p.getAName():p.getBName(), isa?p.getB():p.getA());
 		}
-	}
-	
-	
-	public Renderable getRenderable() {
-		if (renderable != null) return renderable;
-		makeRenderable();
-		return renderable;
-		
-	}
-	
-	private void makeRenderable() {
-		renderable = new Renderable(shape, Material.stroke(isSpawnpoint()?Color.MAGENTA:Color.BLUE), transform);
-//		g.setColor(r.isSpawnpoint()?Color.PINK:Color.CYAN);
-//		g.drawString(r.getName(), rx, ry); TODO: Add room labels again, maybe through transform hierarchy.
 	}
 	
 	// Has immediate path to target, not necessarily access to.

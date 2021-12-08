@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Set;
 
 import zuul.math.Int2;
-import zuul.renderer.Renderable;
 
 public class Level {
 	// Serialized
@@ -90,15 +89,4 @@ public class Level {
     		if (r.contains(p)) return r;
     	return null;
     }
-
-	public Set<Renderable> getRenderables() {
-		Set<Renderable> renderables = new HashSet<>();
-		for (Path p : getPaths())
-			renderables.add(p.getRenderable());
-		for (Room r : getRooms()) 
-			renderables.add(r.getRenderable());
-		// TODO: Text elements
-		return renderables;
-	}
-    
 }

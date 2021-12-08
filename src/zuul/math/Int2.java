@@ -14,8 +14,8 @@ public class Int2 {
 		this.y = 0;
 	}
 	public Int2(Int2 o) {
-		this.x = o.x;
-		this.y = o.y;
+		this();
+		set(o);
 	}
 	public static Int2 clone(Int2 o) {
 		return new Int2(o.x, o.y);
@@ -94,6 +94,9 @@ public class Int2 {
 	}
 	public static Int2 div(Int2 a, Int2 b) {
 		return new Int2(a.x / b.x, a.y / b.y);
+	}
+	public static Int2 div(Int2 a, int d) {
+		return new Int2(a.x / d, a.y / d);
 	}
 	
 	@Override

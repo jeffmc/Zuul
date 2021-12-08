@@ -63,43 +63,41 @@ public abstract class Renderer {
 	public static int lineNumber() { return lineNumber(1); }
 	
 	// Old methods
-	@Deprecated
-	@SuppressWarnings("unused")
-	private void drawElement(Graphics g, Renderable r) {
-		Material m = r.material;
-		Int2 pos = r.transform.position, scale = r.transform.scale;
-		Int2 hscale, ulpos;
-		switch (r.shape) {
-		case BOX:
-			hscale = new Int2(scale).div(2);
-			ulpos = new Int2(pos).sub(hscale);
-			if (m.fill != null) {
-				g.setColor(m.fill);
-				g.fillRect(ulpos.x, ulpos.y, scale.x, scale.y);
-			}
-			if (m.stroke != null) {
-				g.setColor(m.stroke);
-				g.drawRect(ulpos.x, ulpos.y, scale.x, scale.y);
-			}
-			break;
-		case LINE: // Fill not supported for LINE
-			if (m.stroke != null) {
-				g.setColor(m.stroke);
-				g.drawLine(pos.x, pos.y, scale.x, scale.y);
-			}
-			break;
-		case OVAL:
-			hscale = new Int2(scale).div(2);
-			ulpos = new Int2(pos).sub(hscale);
-			if (m.fill != null) {
-				g.setColor(m.fill);
-				g.fillOval(ulpos.x, ulpos.y, scale.x, scale.y);
-			}
-			if (m.stroke != null) {
-				g.setColor(m.stroke);
-				g.drawOval(ulpos.x, ulpos.y, scale.x, scale.y);
-			}
-			break;
-		}
-	}
+//	private void drawElement(Graphics g, Renderable r) {
+//		Material m = r.material;
+//		Int2 pos = r.transform.position, scale = r.transform.scale;
+//		Int2 hscale, ulpos;
+//		switch (r.shape) {
+//		case BOX:
+//			hscale = new Int2(scale).div(2);
+//			ulpos = new Int2(pos).sub(hscale);
+//			if (m.fill != null) {
+//				g.setColor(m.fill);
+//				g.fillRect(ulpos.x, ulpos.y, scale.x, scale.y);
+//			}
+//			if (m.stroke != null) {
+//				g.setColor(m.stroke);
+//				g.drawRect(ulpos.x, ulpos.y, scale.x, scale.y);
+//			}
+//			break;
+//		case LINE: // Fill not supported for LINE
+//			if (m.stroke != null) {
+//				g.setColor(m.stroke);
+//				g.drawLine(pos.x, pos.y, scale.x, scale.y);
+//			}
+//			break;
+//		case OVAL:
+//			hscale = new Int2(scale).div(2);
+//			ulpos = new Int2(pos).sub(hscale);
+//			if (m.fill != null) {
+//				g.setColor(m.fill);
+//				g.fillOval(ulpos.x, ulpos.y, scale.x, scale.y);
+//			}
+//			if (m.stroke != null) {
+//				g.setColor(m.stroke);
+//				g.drawOval(ulpos.x, ulpos.y, scale.x, scale.y);
+//			}
+//			break;
+//		}
+//	}
 }

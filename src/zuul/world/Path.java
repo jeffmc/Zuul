@@ -1,12 +1,5 @@
 package zuul.world;
 
-import java.awt.Color;
-
-import zuul.math.IntTransform;
-import zuul.renderer.Material;
-import zuul.renderer.Renderable;
-import zuul.renderer.Renderable.Shape;
-
 public abstract class Path {
 	// Serialized fields
 	// getType() is also serialized.
@@ -50,14 +43,6 @@ public abstract class Path {
 	public abstract boolean accessToB(PlayerState ps);
 
 	public abstract PathType getType();
-	
-	public Renderable getRenderable() {
-		Room a = getA(), b = getB();
-		return new Renderable(
-				Shape.LINE,
-				Material.stroke(this instanceof TwoWayPath?Color.GREEN:Color.YELLOW),
-				new IntTransform(a.getPosition(), b.getPosition()));
-	}
 	
 	public enum PathType {
 		TWO_WAY,

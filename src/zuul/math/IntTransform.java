@@ -22,6 +22,10 @@ public class IntTransform {
 	public IntTransform() {
 		this(0,0,1,1);
 	}
+	public IntTransform(IntTransform o) {
+		this();
+		this.set(o);
+	}
 	public void set(int x, int y, int w, int h) {
 		position.set(x, y);
 		scale.set(w, h);
