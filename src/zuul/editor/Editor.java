@@ -1,4 +1,4 @@
-package zuul;
+package zuul.editor;
 
 import java.awt.Canvas;
 import java.awt.Color;
@@ -162,7 +162,7 @@ public class Editor {
 			final long nspf = 1000000000 / 60;
 			if (delta > nspf) {
 				lastTime = time;
-				System.out.println("EditorFrame: frameTime: " + delta/1000000.0f + "ms");
+//				System.out.println("EditorFrame: frameTime: " + delta/1000000.0f + "ms");
 	
 				bufferStrategy.show();
 				Graphics gg = bufferStrategy.getDrawGraphics();
@@ -215,6 +215,8 @@ public class Editor {
 	public void setActiveScene(Scene scene) {
 		activeScene = scene;
 		camera.set(0,0);
+		if (activeScene != null)
+			new SceneViewer(activeScene);
 	}
 	
 }

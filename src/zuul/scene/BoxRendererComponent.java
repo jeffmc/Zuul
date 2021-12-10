@@ -15,6 +15,6 @@ public class BoxRendererComponent extends Component {
 	
 	@Override
 	public String toString() {
-		return BoxRendererComponent.class.getSimpleName();
+		return "Box, " + material.toString();
 	}
 }

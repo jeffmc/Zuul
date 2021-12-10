@@ -4,7 +4,7 @@ import java.awt.Graphics;
 import java.util.ArrayList;
 import java.util.List;
 
-import zuul.Editor;
+import zuul.editor.Editor;
 
 public abstract class Renderer {
 	

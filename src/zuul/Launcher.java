@@ -2,6 +2,7 @@ package zuul;
 
 import java.io.File;
 
+import zuul.editor.Editor;
 import zuul.math.IntTransform;
 import zuul.scene.Scene;
 import zuul.util.LevelManager;
@@ -16,7 +17,7 @@ public class Launcher {
 	private static Editor editor;
 	private static Game instance;
 	private static Level level;
-//	private static LevelState ls; TODO: Add levelState, to check if items have been picked up.
+//	private static LevelState ls; // TODO: Add levelState, to check if items have been picked up.
 	
 	public static void main(String args[]) {
 //		propertiesTest();

@@ -4,11 +4,13 @@ import java.lang.reflect.Constructor;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.TreeSet;
 
 public final class ECS {
 
@@ -17,26 +19,26 @@ public final class ECS {
 	private String label;
 	public String getLabel() { return label; }
 	
-	private Set<Long> entities;
+	private TreeSet<Long> entities;
 	private Set<Component> components;
 	
-	private Map<Class<? extends Component>, Set<Component>> componentMap;
-	private Map<Long, Set<Component>> entityComponentMap;
+	private Map<Class<? extends Component>, HashSet<Component>> componentMap;
+	private Map<Long, HashSet<Component>> entityComponentMap;
 	
 	public ECS(String label) {
 		this.label = label;
 		
-		entities = new HashSet<>();
-		components = new HashSet<>();
+		entities = new TreeSet<>();
 		
-		componentMap = new HashMap<Class<? extends Component>, Set<Component>>();
-		entityComponentMap = new HashMap<Long, Set<Component>>();
+		componentMap = new HashMap<Class<? extends Component>, HashSet<Component>>();
+		entityComponentMap = new HashMap<Long, HashSet<Component>>();
 	}
 	
 	public long newEntity() {
 		Long e = random.nextLong(); // Generate entity
+		entities.add(e);
 		entityComponentMap.put(e, new HashSet<>()); // Generate component map for entity
-		if (!entities.add(e)) throw new IllegalStateException("ECS RANDOMLY GENERATED SAME LONG TWICE!"); // Add entity to entity set
+//		if (!entities.add(e)) throw new IllegalStateException("ECS RANDOMLY GENERATED SAME LONG TWICE!"); // Add entity to entity set
 		return e; // Return new entity.
 	}
 
@@ -54,6 +56,13 @@ public final class ECS {
 		throw new IllegalStateException("Entity doesn't have component of type: " + comp.getName());
 	}
 	
+	// Returns all components entity possesses
+	public Set<Component> getComponents(long entity) {
+		if (!this.entityExists(entity))
+			throw new IllegalStateException("Entity doesn't exist!");
+		return entityComponentMap.get(Long.valueOf(entity));
+	}
+	
 	// Returns null if component not found
 	private <T extends Component> T getComponentOrNull(Class<T> comp, long entity) {
 		Set<Component> eComps = entityComponentMap.get(entity); // Get all components in entity.
@@ -62,7 +71,7 @@ public final class ECS {
 		return null;
 	}
 	
-	public boolean entityExists(long entity) { return entities.contains(entity); } // Does entity exist
+	public boolean entityExists(long entity) { return entities.contains(Long.valueOf(entity)); } // Does entity exist TODO: FIX
 	
 	// TODO: Add remove component, view<Component, Component> methods, etc.
 	public <T extends Component> T addComponent(Class<T> comp, long entity, Object... otherArgs) {
@@ -89,7 +98,7 @@ public final class ECS {
 			if (componentMap.containsKey(comp)) { // Add to existing componentMap set
 				componentMap.get(comp).add(newComp);
 			} else { // Add to new componentMap set
-				Set<Component> newSet = new HashSet<>();
+				HashSet<Component> newSet = new HashSet<>();
 				newSet.add(newComp);
 				componentMap.put(comp, newSet);
 			}
@@ -126,8 +135,6 @@ public final class ECS {
 		private Class<? extends Component>[] componentTypes;
 		public Class<? extends Component>[] getComponentTypes() { return componentTypes; }
 		
-		private Set<Long> entities;
-		
 		private Map<Long, Component[]> results;
 		public Map<Long, Component[]> getResults() { return Collections.unmodifiableMap(results); }
 		public Collection<Component[]> getComponents() { return Collections.unmodifiableCollection(results.values()); }
@@ -139,7 +146,6 @@ public final class ECS {
 			this.ecs = ecs;
 			this.componentTypes = componentTypes;
 			
-			entities = new HashSet<>();
 			results = new HashMap<>();
 			
 			for (Component c : componentMap.get(componentTypes[0])) {
@@ -148,7 +154,7 @@ public final class ECS {
 				cArr[0] = c;
 				results.put(e, cArr);
 			};
-			Set<Long> toRemove = new HashSet<>();
+			Set<Long> toRemove = new TreeSet<>();
 			for (int i=1;i<componentTypes.length;i++) {
 				final int x = i; // For anonymous predicate implementation
 				
@@ -172,5 +178,9 @@ public final class ECS {
 					System.out.println("  " + c.toString());
 			}
 		}
+	}
+	
+	public int sizeEntities() {
+		return entities.size();
 	}
 }

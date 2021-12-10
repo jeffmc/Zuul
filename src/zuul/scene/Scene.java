@@ -20,7 +20,7 @@ public class Scene {
 	private String label;
 	public String getLabel() { return label; }
 	
-	private ECS ecs;
+	public ECS ecs;
 	
 	public Scene(String label) {
 		this.label = label;
