@@ -15,6 +15,6 @@ public class BoxRendererComponent extends Component {
 	
 	@Override
 	public String toString() {
-		return BoxRendererComponent.class.getName();
+		return BoxRendererComponent.class.getSimpleName();
 	}
 }

@@ -13,16 +13,18 @@ import zuul.world.Room;
 
 public class Launcher {
 	
-	private static SceneEditor editor;
+	private static Editor editor;
 	private static Game instance;
 	private static Level level;
 //	private static LevelState ls; TODO: Add levelState, to check if items have been picked up.
 	
 	public static void main(String args[]) {
+//		propertiesTest();
+		
 		level = LevelManager.load(new File("GenesisReadOnly.yaml"));
 		LevelManager.save(level);
 		
-		editor = new SceneEditor();
+		editor = new Editor();
 		Scene scene = Scene.levelToScene(level);
 		editor.setActiveScene(scene);
 		editor.start();
@@ -32,6 +34,31 @@ public class Launcher {
 			instance.play();
 		}
 	}
+	
+//	public static void propertiesTest() {
+//		Class<?> cls = ECS.class;
+//		for (Field f : cls.getDeclaredFields()) {
+//			System.out.println(Modifier.toString(f.getModifiers()) + " " + f.getGenericType().getTypeName() + " " + f.getName() + ";");
+//		}
+//		System.out.println();
+//		for (Constructor<?> d : cls.getDeclaredConstructors()) {
+//			Parameter[] ps = d.getParameters();
+//			String[] pss = new String[ps.length]; 
+//			for (int i=0;i<ps.length;i++)
+//				pss[i] = ps[i].getParameterizedType().getTypeName();
+//			
+//			System.out.println(Modifier.toString(d.getModifiers()) + " " + d.getName() + "(" + String.join(", ", pss) + ");");
+//		}
+//		System.out.println();
+//		for (Method m : cls.getDeclaredMethods()) {
+//			Parameter[] ps = m.getParameters();
+//			String[] pss = new String[ps.length];
+//			for (int i=0;i<ps.length;i++)
+//				pss[i] = ps[i].getParameterizedType().getTypeName();
+//			
+//			System.out.println(Modifier.toString(m.getModifiers()) + " " + m.getGenericReturnType().getTypeName() + " " + m.getName() + "(" + String.join(", ", pss) + ");");
+//		}
+//	}
 	
 	@Deprecated
 	@SuppressWarnings("unused")

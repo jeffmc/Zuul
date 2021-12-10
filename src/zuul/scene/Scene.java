@@ -2,16 +2,17 @@ package zuul.scene;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.util.Random;
 
 import mcmillan.ecs.Component;
 import mcmillan.ecs.ECS;
-import zuul.SceneEditor;
 import zuul.math.Int2;
 import zuul.math.IntTransform;
 import zuul.renderer.Material;
 import zuul.renderer.RenderCommand;
 import zuul.renderer.Renderer;
 import zuul.world.Level;
+import zuul.world.Path;
 import zuul.world.Room;
 
 public class Scene {
@@ -35,14 +36,9 @@ public class Scene {
 	public Entity newEntity(String tag) { return newEntity(tag, new IntTransform()); }
 	public Entity newEntity() { return newEntity(null, new IntTransform()); }
 	
-	public void runTest() {
-		ECS.View view = ecs.view(TagComponent.class, TransformComponent.class);
-		view.print();
-	}
-	
 	public void render(Int2 camera) {
 		Renderer.beginFrame();
-		Int2 viewport = new Int2(SceneEditor.EDITOR_SIZE, SceneEditor.EDITOR_SIZE); // Viewport size
+		Int2 viewport = new Int2(Renderer.viewportWidth(), Renderer.viewportHeight()); // Viewport size
 		// Pre-scene
 		{
 			
@@ -55,33 +51,20 @@ public class Scene {
 			Renderer.submit(RenderCommand.fillRect(
 					new IntTransform(viewport.x/2-2, viewport.y/2-2, 4, 4)));
 			
-			Renderer.submit(RenderCommand.drawLine(new Int2(200,200), new Int2(600,400)));
-			
-			Renderer.submit(RenderCommand.setColor(Color.WHITE));
-			Renderer.submit(RenderCommand.drawString(camera.toString(), new Int2(5, viewport.y-5))); // Draw camera position in bottom-left corner.
-
-//			IntTransform t = new IntTransform(10, 20, 50, 30);
-//			Material m = Material.fillAndStroke(new Color(255,0,0), new Color(0,255,0));
-//			Renderer.submit(RenderCommand.box(new TransformComponent(null, 0, t), new BoxRendererComponent(null, 0, m)));
-//
-//			Renderer.submit(RenderCommand.setColor(Color.GREEN));
-//			Renderer.submit(RenderCommand.fillRect(
-//					new IntTransform(t.position, new Int2(4,4))));
-			
-//			Renderer.submit(RenderCommand.setColor(m.fill));
-//			Renderer.submit(RenderCommand.fillRect(t));
-//			Renderer.submit(RenderCommand.setColor(m.stroke));
-//			Renderer.submit(RenderCommand.drawRect(t));
 			
 			// Center canvas at camera coords TODO: Add camera zoom
+			Renderer.submit(RenderCommand.setColor(Color.WHITE));
+			Renderer.submit(RenderCommand.drawString(camera.toString(), new Int2(5, viewport.y-5))); // Draw camera position in bottom-left corner.
+			
+			// Camera translation
 			Renderer.submit(RenderCommand.centerAt(camera, viewport));
 		}
 		
 		// Scene components
 		{
-			// Render BoxRenderComponents
-			ECS.View view = ecs.view(TransformComponent.class, BoxRendererComponent.class);
-			for (Component[] cs : view.getComponents()) {
+			// BoxRendererComponent
+			ECS.View boxes = ecs.view(TransformComponent.class, BoxRendererComponent.class);
+			for (Component[] cs : boxes.getComponents()) {
 				TransformComponent t = (TransformComponent) cs[0];
 				BoxRendererComponent box = (BoxRendererComponent) cs[1];
 				
@@ -98,6 +81,13 @@ public class Scene {
 					Renderer.submit(RenderCommand.drawRect(transform));
 				}
 			}
+			// LineRendererComponent
+			ECS.View lines = ecs.view(/* TransformComponent.class, */LineRendererComponent.class); // As of now, TransformComponent has no effect on LineRendererComponent.
+			for (Component[] cs : lines.getComponents()) {
+//				TransformComponent t = (TransformComponent) cs[0];
+				LineRendererComponent line = (LineRendererComponent) cs[0];
+				Renderer.submit(RenderCommand.line(line));
+			}
 		}
 		Renderer.endFrame();
 	}
@@ -110,11 +100,19 @@ public class Scene {
 		Material regularMat = Material.stroke(Color.white), spawnMat = Material.stroke(Color.pink);
 		Scene scene = new Scene(in.getName());
 		for (Room r : in.getRooms()) {
-			Entity e = scene.newEntity(r.getName(), r.getTransform());
+			Entity e = scene.newEntity("Room " + r.getName(), r.getTransform());
 			scene.ecs.addComponent(BoxRendererComponent.class, e.ecsID(), r.isSpawnpoint() ? spawnMat : regularMat);
 		}
-		// TODO: Add paths
-		scene.runTest();
+		System.out.println("Path Count: "+in.getPaths().size());
+		for (Path p : in.getPaths()) {
+			// TODO: Add paths
+			Random r = new Random();
+			Entity e = scene.newEntity("Path: " + p.getA().getName() + " - "+ p.getB().getName());
+			int v = r.nextInt(256);
+			scene.ecs.addComponent(LineRendererComponent.class, e.ecsID(), 
+					new Color(v, 255-v, 128+v/2), 
+					p.getA().getPosition(), p.getB().getPosition());
+		}
 		return scene;
 	}
 	

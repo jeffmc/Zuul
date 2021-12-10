@@ -1,7 +1,9 @@
 package zuul;
 
 import java.awt.Canvas;
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
@@ -9,22 +11,23 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferStrategy;
 
-import javax.swing.JFrame;
-
 import zuul.math.Int2;
 import zuul.renderer.Renderer;
 import zuul.scene.Scene;
 import zuul.world.Room;
 
-@SuppressWarnings("serial")
-public class EditorFrame extends JFrame {
+public class Editor {
 
+	public static final int CANVAS_SIZE = 768;
+	
 	public enum DragType {
 		CAM_MOVE,
 		ROOM_MOVE,
 	}
 
+	private Frame frame;
 	private Canvas canvas;
+	
 	private BufferStrategy bufferStrategy;
 	
 	private Scene activeScene;
@@ -37,14 +40,15 @@ public class EditorFrame extends JFrame {
 	private Room movingRoom;
 	private Int2 startRoom;
 	
-	public EditorFrame(Scene scene) {
-		super("Zuul Editor");
-		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		this.setResizable(true);
-		this.setIgnoreRepaint(true);
+	public Editor(Scene scene) {
+		frame = new Frame("Zuul Editor");
+//		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setResizable(true);
+		frame.setIgnoreRepaint(true);
 		
-		setupCanvas(new Dimension(SceneEditor.EDITOR_SIZE,SceneEditor.EDITOR_SIZE));
-		this.add(canvas);
+		setupCanvas(new Dimension(CANVAS_SIZE,CANVAS_SIZE));
+		frame.add(canvas);
+		frame.pack();
 		
 		camera = new Int2();
 		startCamera = new Int2();
@@ -55,9 +59,9 @@ public class EditorFrame extends JFrame {
 	
 	private void setupCanvas(Dimension size) {
 		canvas = new Canvas();
-		setMinimumSize(size);
-		setPreferredSize(size);
-		setMaximumSize(size);
+		canvas.setMinimumSize(size);
+		canvas.setPreferredSize(size);
+		canvas.setMaximumSize(size);
 	}
 	
 	
@@ -78,11 +82,9 @@ public class EditorFrame extends JFrame {
 					switch (dragType) {
 					case ROOM_MOVE:
 						movingRoom.setPosition(Int2.sub(startRoom, delta));
-						repaint();
 						break;
 					case CAM_MOVE:
 						camera.set(Int2.add(startCamera, delta));
-						repaint();
 						break;
 					}
 				}
@@ -107,7 +109,6 @@ public class EditorFrame extends JFrame {
 				case MouseEvent.BUTTON2:
 					camera.set(Int2.add(startCamera, delta));
 					dragType = null;
-					repaint();
 					break;
 				}
 			}
@@ -139,55 +140,49 @@ public class EditorFrame extends JFrame {
 		});
 	}
 	
-	public EditorFrame() {
+	public Editor() {
 		this(null);
 	}
 	
 	public void start() {
 		// Get bufferStrat
- 		pack(); // necessary to validate components for buffer functions below
+ 		frame.pack(); // necessary to validate components for buffer functions below
 		canvas.createBufferStrategy(2);
 		bufferStrategy = canvas.getBufferStrategy();
 		
 		// Set visible in center of screen
-		setLocationRelativeTo(null);
-		setVisible(true);
+		frame.setLocationRelativeTo(null);
+		frame.setVisible(true);
 		
 		// Begin game loop
-		long lastTime = System.currentTimeMillis();
+		long lastTime = System.nanoTime();
 		while (true) { // TODO: Make a better framerate-locked loop (LayerStack in Application?)
-			try {
-				Thread.sleep(16);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			long time = System.currentTimeMillis();
+			long time = System.nanoTime();
 			long delta = time - lastTime;
-			lastTime = time;
-//			System.out.println("EditorFrame: frameTime: " + delta + "ms");
-			this.repaint();
+			final long nspf = 1000000000 / 60;
+			if (delta > nspf) {
+				lastTime = time;
+				System.out.println("EditorFrame: frameTime: " + delta/1000000.0f + "ms");
+	
+				bufferStrategy.show();
+				Graphics gg = bufferStrategy.getDrawGraphics();
+				if (gg != null) {
+					int vw = Renderer.viewportWidth(), vh = Renderer.viewportHeight();
+					gg.setColor(Color.ORANGE);
+					gg.fillRect(0, 0, vw, vh);
+					activeScene.render(camera);
+					activeScene.draw(gg);
+					gg.dispose();
+					bufferStrategy.show();
+				}
+			}
 		}
 	}
 	
-	
-	@Override
-	public void paint(Graphics g) {
-		bufferStrategy.show();
-		Graphics gg = bufferStrategy.getDrawGraphics();
-		if (gg != null) {
-			int vw = Renderer.viewportWidth(), vh = Renderer.viewportHeight();
-			gg.fillRect(0, 0, vw, vh);
-			activeScene.render(camera);
-			activeScene.draw(gg);
-			gg.dispose();
-			bufferStrategy.show();
-		}
-	}
-	
-	private Int2 canvasCoordsToLevelCoords(Point canvas) {
+	private Int2 canvasCoordsToLevelCoords(Point canvasCoords) {
 		Int2 lvl = new Int2(camera);
-		lvl.x -= getWidth()/2-canvas.x;
-		lvl.y -= getHeight()/2-canvas.y;
+		lvl.x -= canvas.getWidth()/2-canvasCoords.x;
+		lvl.y -= canvas.getHeight()/2-canvasCoords.y;
 		return lvl;
 	}
 
@@ -204,11 +199,22 @@ public class EditorFrame extends JFrame {
 //		}
 //		repaint();
 //	}
-	
+
+
+//	public Room selectRoom(Room newSelection) { TODO: Replace w/ selected entity
+//		if (selectedRoom != null)
+//			selectedRoom.getRenderable().material.fill = null;
+//		selectedRoom = newSelection;
+//		if (selectedRoom != null)
+//			selectedRoom.getRenderable().material.fill = Color.RED;
+//		return selectedRoom;
+//	}
+//	public Room selectRoom(Int2 worldCoords) { 
+//		return selectRoom(activeLevel.getRoom(worldCoords));
+//	}
 	public void setActiveScene(Scene scene) {
 		activeScene = scene;
 		camera.set(0,0);
-		repaint();
 	}
 	
 }

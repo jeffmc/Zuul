@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.function.Predicate;
 import java.util.Random;
 import java.util.Set;
 
@@ -145,24 +144,24 @@ public final class ECS {
 			
 			for (Component c : componentMap.get(componentTypes[0])) {
 				long e = c.getEntity();
-				entities.add(e);
 				Component[] cArr = new Component[componentTypes.length];
 				cArr[0] = c;
 				results.put(e, cArr);
 			};
+			Set<Long> toRemove = new HashSet<>();
 			for (int i=1;i<componentTypes.length;i++) {
-				final int x = i;
-				entities.removeIf(new Predicate<Long>() {
-					@Override public boolean test(Long e) {
-						Component c = ecs.getComponentOrNull(componentTypes[x], e);
-						if (c == null) {
-							return true;
-						} else {
-							results.get(e)[x] = c;
-							return false;
-						}
-					}
-				});
+				final int x = i; // For anonymous predicate implementation
+				
+				Class<? extends Component> componentType = componentTypes[x];
+
+				toRemove.clear();
+				for (Long e : results.keySet()) {
+					Component c = ecs.getComponentOrNull(componentType, e);
+					if (c != null)  results.get(e)[x] = c; else toRemove.add(e);
+				}
+				for (Long r : toRemove) {
+					results.remove(r);
+				}
 			}
 		}
 		

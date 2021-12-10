@@ -4,12 +4,11 @@ import java.awt.Graphics;
 import java.util.ArrayList;
 import java.util.List;
 
-import zuul.SceneEditor;
-import zuul.math.Int2;
+import zuul.Editor;
 
 public abstract class Renderer {
 	
-	private static int viewportWidth = SceneEditor.EDITOR_SIZE, viewportHeight = SceneEditor.EDITOR_SIZE;
+	private static int viewportWidth = Editor.CANVAS_SIZE, viewportHeight = Editor.CANVAS_SIZE;
 	
 	private static List<RenderCommand> renderCommands = new ArrayList<>();
 	
@@ -61,43 +60,4 @@ public abstract class Renderer {
 	public static int lineNumber(int stackTraceOffset) { 
 		return Thread.currentThread().getStackTrace()[2+stackTraceOffset].getLineNumber(); }
 	public static int lineNumber() { return lineNumber(1); }
-	
-	// Old methods
-//	private void drawElement(Graphics g, Renderable r) {
-//		Material m = r.material;
-//		Int2 pos = r.transform.position, scale = r.transform.scale;
-//		Int2 hscale, ulpos;
-//		switch (r.shape) {
-//		case BOX:
-//			hscale = new Int2(scale).div(2);
-//			ulpos = new Int2(pos).sub(hscale);
-//			if (m.fill != null) {
-//				g.setColor(m.fill);
-//				g.fillRect(ulpos.x, ulpos.y, scale.x, scale.y);
-//			}
-//			if (m.stroke != null) {
-//				g.setColor(m.stroke);
-//				g.drawRect(ulpos.x, ulpos.y, scale.x, scale.y);
-//			}
-//			break;
-//		case LINE: // Fill not supported for LINE
-//			if (m.stroke != null) {
-//				g.setColor(m.stroke);
-//				g.drawLine(pos.x, pos.y, scale.x, scale.y);
-//			}
-//			break;
-//		case OVAL:
-//			hscale = new Int2(scale).div(2);
-//			ulpos = new Int2(pos).sub(hscale);
-//			if (m.fill != null) {
-//				g.setColor(m.fill);
-//				g.fillOval(ulpos.x, ulpos.y, scale.x, scale.y);
-//			}
-//			if (m.stroke != null) {
-//				g.setColor(m.stroke);
-//				g.drawOval(ulpos.x, ulpos.y, scale.x, scale.y);
-//			}
-//			break;
-//		}
-//	}
 }

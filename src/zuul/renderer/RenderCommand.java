@@ -8,6 +8,7 @@ import java.lang.reflect.Method;
 import zuul.math.Int2;
 import zuul.math.IntTransform;
 import zuul.scene.BoxRendererComponent;
+import zuul.scene.LineRendererComponent;
 import zuul.scene.TransformComponent;
 
 public class RenderCommand {
@@ -147,6 +148,12 @@ public class RenderCommand {
 		} else {
 			return new RenderCommand();
 		}
+	}
+	public static RenderCommand line(LineRendererComponent lrc) {
+		return new RenderCommand(
+			RenderCommand.setColor(lrc.color), 
+			RenderCommand.drawLine(lrc.a,lrc.b)
+		);
 	}
 	
 }
