@@ -1,4 +1,4 @@
-package zuul.math;
+package mcmillan.engine.math;
 
 import java.util.StringTokenizer;
 

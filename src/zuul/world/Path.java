@@ -12,10 +12,13 @@ public abstract class Path {
 		this.b = _b;
 		this.aName = _aName;
 		this.bName = _bName;
-		a.addPath(this);
-		b.addPath(this);
+		
 		if (a == b) throw new IllegalArgumentException("Invalid path, rooms are the same!");
 		if (a.getLevel() != b.getLevel()) throw new IllegalArgumentException("Rooms don't have same parent level!");
+		
+		a.addPath(this);
+		b.addPath(this);
+		a.getLevel().add(this);
 	}
 	
 	final public Room getA() {

@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import zuul.math.Int2;
+import mcmillan.engine.math.Int2;
 
 public class Level {
 	// Serialized

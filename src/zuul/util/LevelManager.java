@@ -14,7 +14,7 @@ import com.amihaiemil.eoyaml.YamlPrinter;
 import com.amihaiemil.eoyaml.YamlSequence;
 import com.amihaiemil.eoyaml.YamlSequenceBuilder;
 
-import zuul.math.IntTransform;
+import mcmillan.engine.math.IntTransform;
 import zuul.world.Level;
 import zuul.world.OneWayPath;
 import zuul.world.Path;

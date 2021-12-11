@@ -1,4 +1,4 @@
-package zuul.math;
+package mcmillan.engine.math;
 
 public class Float2 {
 	public float x,y;

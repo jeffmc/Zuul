@@ -1,18 +1,17 @@
-package mcmillan.ecs;
+package mcmillan.engine.ecs;
 
 import java.lang.reflect.Constructor;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.TreeSet;
 
-public final class ECS {
+public final class ECSRegistry {
 
 	private static Random random = new Random();
 	
@@ -25,7 +24,7 @@ public final class ECS {
 	private Map<Class<? extends Component>, HashSet<Component>> componentMap;
 	private Map<Long, HashSet<Component>> entityComponentMap;
 	
-	public ECS(String label) {
+	public ECSRegistry(String label) {
 		this.label = label;
 		
 		entities = new TreeSet<>();
@@ -51,20 +50,18 @@ public final class ECS {
 
 	// Returns null if component not found
 	public <T extends Component> T getComponent(Class<T> comp, long entity) {
-		T result = getComponentOrNull(comp, entity);
-		if (result != null) return result;
-		throw new IllegalStateException("Entity doesn't have component of type: " + comp.getName());
+		assert hasComponent(comp, entity);
+		return getComponentOrNull(comp, entity);
 	}
 	
 	// Returns all components entity possesses
 	public Set<Component> getComponents(long entity) {
-		if (!this.entityExists(entity))
-			throw new IllegalStateException("Entity doesn't exist!");
+		assert this.entityExists(entity);
 		return entityComponentMap.get(Long.valueOf(entity));
 	}
 	
 	// Returns null if component not found
-	private <T extends Component> T getComponentOrNull(Class<T> comp, long entity) {
+	public <T extends Component> T getComponentOrNull(Class<T> comp, long entity) {
 		Set<Component> eComps = entityComponentMap.get(entity); // Get all components in entity.
 		for (Component c : eComps) // Iterate over components
 			if (comp.isInstance(c)) return comp.cast(c); // If component is instance of type, cast and return.
@@ -75,14 +72,14 @@ public final class ECS {
 	
 	// TODO: Add remove component, view<Component, Component> methods, etc.
 	public <T extends Component> T addComponent(Class<T> comp, long entity, Object... otherArgs) {
-		if (hasComponent(comp, entity)) throw new IllegalStateException("Entity already has component of type: " + comp.getTypeName());
+		assert !hasComponent(comp, entity);
 
 		final int OFFSET = 2;
 		Class<?>[] argTypes = new Class<?>[otherArgs.length+OFFSET];
 		Object[] args = new Object[otherArgs.length+OFFSET];
 		args[0] = this; // TODO: Think about removing component polymorphism.
 		args[1] = entity;
-		argTypes[0] = ECS.class;
+		argTypes[0] = ECSRegistry.class;
 		argTypes[1] = long.class;
 		for (int i=0;i<otherArgs.length;i++) {
 			args[i+OFFSET] = otherArgs[i];
@@ -114,8 +111,11 @@ public final class ECS {
 			typeNames[i] = argTypes[i].getName();
 		return "[" + String.join(", ", typeNames) + "]";
 	}
-	
-	public boolean removeComponent(Class<? extends Component> compType, long entity) {
+
+	public void removeComponent(Class<? extends Component> compType, long entity) {
+		assert removeComponentIfExists(compType, entity);
+	}
+	public boolean removeComponentIfExists(Class<? extends Component> compType, long entity) {
 		Component comp = getComponentOrNull(compType, entity); // TODO: Fix this function
 		boolean removedFromECMap = entityComponentMap.get(entity).remove(comp);
 		boolean removedFromCMap = componentMap.get(compType).remove(comp);
@@ -124,13 +124,13 @@ public final class ECS {
 	}
 
 	@SafeVarargs
-	public final ECS.View view(Class<? extends Component>... componentTypes) {
-		return new ECS.View(this, componentTypes);
+	public final ECSRegistry.View view(Class<? extends Component>... componentTypes) {
+		return new ECSRegistry.View(this, componentTypes);
 	}
 	public class View {
 		
-		private ECS ecs;
-		public ECS getECS() { return ecs; }
+		private ECSRegistry ecs;
+		public ECSRegistry getECS() { return ecs; }
 		
 		private Class<? extends Component>[] componentTypes;
 		public Class<? extends Component>[] getComponentTypes() { return componentTypes; }
@@ -139,7 +139,7 @@ public final class ECS {
 		public Map<Long, Component[]> getResults() { return Collections.unmodifiableMap(results); }
 		public Collection<Component[]> getComponents() { return Collections.unmodifiableCollection(results.values()); }
 		
-		public View(ECS ecs, Class<? extends Component>[] componentTypes) { // TODO: Add caching
+		public View(ECSRegistry ecs, Class<? extends Component>[] componentTypes) { // TODO: Add caching
 			if (componentTypes == null) throw new IllegalArgumentException("Parameter componentTypes is null!");
 			if (componentTypes.length < 1) throw new IllegalArgumentException("Parameter componentTypes has a length < 1!");
 

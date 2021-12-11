@@ -1,14 +1,14 @@
 package zuul.scene;
 
-import mcmillan.ecs.Component;
-import mcmillan.ecs.ECS;
-import zuul.renderer.Material;
+import mcmillan.engine.ecs.Component;
+import mcmillan.engine.ecs.ECSRegistry;
+import mcmillan.engine.renderer.Material;
 
 public class BoxRendererComponent extends Component {
 
 	public Material material;
 	
-	public BoxRendererComponent(ECS parentECS, long parentEntity, Material m) {
+	public BoxRendererComponent(ECSRegistry parentECS, long parentEntity, Material m) {
 		super(parentECS, parentEntity);
 		this.material = m;
 	}

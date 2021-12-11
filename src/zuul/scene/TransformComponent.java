@@ -1,18 +1,18 @@
 package zuul.scene;
 
-import mcmillan.ecs.Component;
-import mcmillan.ecs.ECS;
-import zuul.math.IntTransform;
+import mcmillan.engine.ecs.Component;
+import mcmillan.engine.ecs.ECSRegistry;
+import mcmillan.engine.math.IntTransform;
 
 public class TransformComponent extends Component {
 	public IntTransform transform;
 	
-	public TransformComponent(ECS parentECS, long parentEntity, IntTransform t) {
+	public TransformComponent(ECSRegistry parentECS, long parentEntity, IntTransform t) {
 		super(parentECS, parentEntity);
 		this.transform = t;
 	}
 	
-	public TransformComponent(ECS parentECS, long parentEntity) {
+	public TransformComponent(ECSRegistry parentECS, long parentEntity) {
 		this(parentECS, parentEntity, new IntTransform());
 	}
 	

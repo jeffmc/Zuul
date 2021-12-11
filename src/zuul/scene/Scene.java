@@ -1,16 +1,15 @@
 package zuul.scene;
 
 import java.awt.Color;
-import java.awt.Graphics;
 import java.util.Random;
 
-import mcmillan.ecs.Component;
-import mcmillan.ecs.ECS;
-import zuul.math.Int2;
-import zuul.math.IntTransform;
-import zuul.renderer.Material;
-import zuul.renderer.RenderCommand;
-import zuul.renderer.Renderer;
+import mcmillan.engine.ecs.Component;
+import mcmillan.engine.ecs.ECSRegistry;
+import mcmillan.engine.math.Int2;
+import mcmillan.engine.math.IntTransform;
+import mcmillan.engine.renderer.Material;
+import mcmillan.engine.renderer.RenderCommand;
+import mcmillan.engine.renderer.Renderer;
 import zuul.world.Level;
 import zuul.world.Path;
 import zuul.world.Room;
@@ -20,11 +19,11 @@ public class Scene {
 	private String label;
 	public String getLabel() { return label; }
 	
-	public ECS ecs;
+	public ECSRegistry ecs;
 	
 	public Scene(String label) {
 		this.label = label;
-		ecs = new ECS(label);
+		ecs = new ECSRegistry(label);
 	}
 	
 	public Entity newEntity(String tag, IntTransform t) {
@@ -36,25 +35,19 @@ public class Scene {
 	public Entity newEntity(String tag) { return newEntity(tag, new IntTransform()); }
 	public Entity newEntity() { return newEntity(null, new IntTransform()); }
 	
-	public void render(Int2 camera) {
-		Renderer.beginFrame();
-		Int2 viewport = new Int2(Renderer.viewportWidth(), Renderer.viewportHeight()); // Viewport size
+	public void render(Int2 viewport, Int2 camera) {
 		// Pre-scene
 		{
-			
-			// Fill background with background color specified in constructor.
-			Renderer.submit(RenderCommand.setColor(new Color(0,0,0))); // TODO: Fix background parameter
-			Renderer.submit(RenderCommand.fillRect(new IntTransform(new Int2(), viewport)));
+			// TODO: Do scene-specific background
 
 			// Draw 4x4 white rect at center of board, mostly for debugging
 			Renderer.submit(RenderCommand.setColor(Color.WHITE));
 			Renderer.submit(RenderCommand.fillRect(
 					new IntTransform(viewport.x/2-2, viewport.y/2-2, 4, 4)));
 			
-			
 			// Center canvas at camera coords TODO: Add camera zoom
 			Renderer.submit(RenderCommand.setColor(Color.WHITE));
-			Renderer.submit(RenderCommand.drawString(camera.toString(), new Int2(5, viewport.y-5))); // Draw camera position in bottom-left corner.
+			Renderer.submit(RenderCommand.drawString("Viewport: " + viewport.toString() + ", Camera: " + camera.toString(), new Int2(5, viewport.y-5))); // Draw camera position in bottom-left corner.
 			
 			// Camera translation
 			Renderer.submit(RenderCommand.centerAt(camera, viewport));
@@ -63,7 +56,7 @@ public class Scene {
 		// Scene components
 		{
 			// BoxRendererComponent
-			ECS.View boxes = ecs.view(TransformComponent.class, BoxRendererComponent.class);
+			ECSRegistry.View boxes = ecs.view(TransformComponent.class, BoxRendererComponent.class);
 			for (Component[] cs : boxes.getComponents()) {
 				TransformComponent t = (TransformComponent) cs[0];
 				BoxRendererComponent box = (BoxRendererComponent) cs[1];
@@ -82,18 +75,13 @@ public class Scene {
 				}
 			}
 			// LineRendererComponent
-			ECS.View lines = ecs.view(/* TransformComponent.class, */LineRendererComponent.class); // As of now, TransformComponent has no effect on LineRendererComponent.
+			ECSRegistry.View lines = ecs.view(/* TransformComponent.class, */LineRendererComponent.class); // As of now, TransformComponent has no effect on LineRendererComponent.
 			for (Component[] cs : lines.getComponents()) {
 //				TransformComponent t = (TransformComponent) cs[0];
 				LineRendererComponent line = (LineRendererComponent) cs[0];
 				Renderer.submit(RenderCommand.line(line));
 			}
 		}
-		Renderer.endFrame();
-	}
-	
-	public void draw(Graphics g) {
-		Renderer.drawFrame(g);
 	}
 	
 	public static Scene levelToScene(Level in) {
@@ -114,6 +102,10 @@ public class Scene {
 					p.getA().getPosition(), p.getB().getPosition());
 		}
 		return scene;
+	}
+
+	public Entity selectEntityAt(Int2 worldCoords) {
+		return null; // TODO: Write selection algorithm
 	}
 	
 }

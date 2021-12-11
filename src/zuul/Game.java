@@ -23,8 +23,7 @@ import zuul.world.Room;
  * @version 1.0 (February 2002)
  */
 
-class Game 
-{
+public class Game  {
     private CommandParser cmdParser;
     private Level level;
     private PlayerState playerState;

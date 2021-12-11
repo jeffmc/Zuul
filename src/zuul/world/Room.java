@@ -3,10 +3,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 
-import zuul.math.Int2;
-import zuul.math.IntTransform;
+import mcmillan.engine.math.Int2;
+import mcmillan.engine.math.IntTransform;
+
+import java.util.Set;
 
 /*
  * Class Room - a room in an adventure game.

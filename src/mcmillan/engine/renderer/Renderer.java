@@ -1,14 +1,15 @@
-package zuul.renderer;
+package mcmillan.engine.renderer;
 
 import java.awt.Graphics;
 import java.util.ArrayList;
 import java.util.List;
 
-import zuul.editor.Editor;
+import mcmillan.editor.EditorLayer;
+import mcmillan.engine.math.Int2;
 
 public abstract class Renderer {
 	
-	private static int viewportWidth = Editor.CANVAS_SIZE, viewportHeight = Editor.CANVAS_SIZE;
+	private static int viewportWidth = EditorLayer.CANVAS_SIZE, viewportHeight = EditorLayer.CANVAS_SIZE;
 	
 	private static List<RenderCommand> renderCommands = new ArrayList<>();
 	
@@ -17,13 +18,14 @@ public abstract class Renderer {
 	// Frame methods and fields
 	private static boolean frameClosed = true;
 	
-	public static void beginFrame() {
+	public static Int2 beginFrame() {
 		frameClosed = false;
 		if (renderCommands != null) {
 			renderCommands.clear();
 		} else {
 			renderCommands = new ArrayList<>();
 		}
+		return new Int2(viewportWidth, viewportHeight);
 	}
 	
 	public static void endFrame() {

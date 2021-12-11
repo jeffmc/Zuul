@@ -1,12 +1,12 @@
-package zuul.renderer;
+package mcmillan.engine.renderer;
 
 import java.awt.Color;
 import java.awt.Graphics;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import zuul.math.Int2;
-import zuul.math.IntTransform;
+import mcmillan.engine.math.Int2;
+import mcmillan.engine.math.IntTransform;
 import zuul.scene.BoxRendererComponent;
 import zuul.scene.LineRendererComponent;
 import zuul.scene.TransformComponent;
@@ -77,6 +77,9 @@ public class RenderCommand {
 			throw new IllegalArgumentException(e);
 		}
 	}
+	public static RenderCommand drawString(Color c, String s, Int2 p) {
+		return new RenderCommand(RenderCommand.setColor(c), RenderCommand.drawString(s, p));
+	}
 	
 	public static RenderCommand fillRect(IntTransform t) {
 		try {
@@ -87,6 +90,9 @@ public class RenderCommand {
 		} catch (NoSuchMethodException | SecurityException e) {
 			throw new IllegalArgumentException(e);
 		}
+	}
+	public static RenderCommand fillRect(Color c, IntTransform t) {
+		return new RenderCommand(RenderCommand.setColor(c), RenderCommand.fillRect(t));
 	}
 	
 	public static RenderCommand drawRect(IntTransform t) {
@@ -99,8 +105,10 @@ public class RenderCommand {
 			throw new IllegalArgumentException(e);
 		}
 	}
+	public static RenderCommand drawRect(Color c, IntTransform t) {
+		return new RenderCommand(RenderCommand.setColor(c), RenderCommand.drawRect(t));
+	}
 	
-
 	public static RenderCommand centerAt(Int2 center, Int2 viewport) {
 		try {
 			Method m = gfxcls.getMethod("translate", int.class, int.class);
@@ -121,13 +129,15 @@ public class RenderCommand {
 			throw new IllegalArgumentException(e);
 		}
 	}
+	public static RenderCommand drawLine(Color c, Int2 a, Int2 b) {
+		return new RenderCommand(RenderCommand.setColor(c), RenderCommand.drawLine(a, b));
+	}
 	
 	// TODO: Line and text render commands (TextAnchor modes?)
 	
 	public static RenderCommand box(TransformComponent tc, BoxRendererComponent brc) {
 		Material m = brc.material;
-		IntTransform t = new IntTransform(tc.transform); // New transform defined by upper-left coordinate for drawing
-		t.position.sub(Int2.div(t.scale, 2));
+		IntTransform t = defineByUpperLeft(tc.transform);
 		if (m.stroke!=null&&m.fill!=null) {
 			return new RenderCommand(
 				RenderCommand.setColor(m.fill),
@@ -149,6 +159,30 @@ public class RenderCommand {
 			return new RenderCommand();
 		}
 	}
+	
+	public static RenderCommand drawBox(IntTransform ot) {
+		IntTransform t = defineByUpperLeft(ot);
+		return RenderCommand.drawRect(new IntTransform(t.position, t.scale));
+	}
+	public static RenderCommand drawBox(Color c, IntTransform t) {
+		return new RenderCommand(RenderCommand.setColor(c), RenderCommand.drawBox(t)); 
+	}
+	
+	public static RenderCommand fillBox(IntTransform ot) {
+		IntTransform t = defineByUpperLeft(ot);
+		return RenderCommand.fillRect(new IntTransform(t.position, t.scale));
+	}
+	public static RenderCommand fillBox(Color c, IntTransform t) {
+		return new RenderCommand(RenderCommand.setColor(c), RenderCommand.fillBox(t)); 
+	}
+	
+	
+	public static IntTransform defineByUpperLeft(IntTransform transform) {
+		IntTransform t = new IntTransform(transform); // New transform defined by upper-left coordinate for drawing
+		t.position.sub(Int2.div(t.scale, 2));
+		return t;
+	}
+	
 	public static RenderCommand line(LineRendererComponent lrc) {
 		return new RenderCommand(
 			RenderCommand.setColor(lrc.color), 
