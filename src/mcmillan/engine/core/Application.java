@@ -2,12 +2,17 @@ package mcmillan.engine.core;
 
 import java.util.Iterator;
 
+import mcmillan.engine.renderer.Renderer;
+
 public abstract class Application {
 
 	private static Application instance = null;
 	public static Application instance() { return instance; }
 	
 	private LayerStack layerStack = new LayerStack();
+	
+	private Window window = new Window();
+	public Window window() { return window; }
 	
 	private boolean running = false;
 	
@@ -54,11 +59,22 @@ public abstract class Application {
 				if (delta > nspf) {
 					lastTime = System.nanoTime();
 					Timestep ts = new Timestep(delta);
+					
+					window.preUpdate();
+					
 					Iterator<Layer> layers = layerStack.ascendingIterator();
 					while (layers.hasNext()) {
 						Layer layer = layers.next();
 						layer.onUpdate(ts);
 					}
+					
+					layers = layerStack.ascendingIterator();
+					while (layers.hasNext()) {
+						Layer layer = layers.next();
+						layer.OnZUIRender(ts);
+					}
+					
+					window.postUpdate();
 				}
 			}
 		}

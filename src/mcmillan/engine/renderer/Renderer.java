@@ -4,12 +4,14 @@ import java.awt.Graphics;
 import java.util.ArrayList;
 import java.util.List;
 
-import mcmillan.editor.EditorLayer;
+import mcmillan.engine.core.Window;
 import mcmillan.engine.math.Int2;
 
 public abstract class Renderer {
 	
-	private static int viewportWidth = EditorLayer.CANVAS_SIZE, viewportHeight = EditorLayer.CANVAS_SIZE;
+	private static int viewportWidth = Window.CANVAS_SIZE, viewportHeight = Window.CANVAS_SIZE;
+
+	public static Int2 viewport() { return new Int2(viewportWidth, viewportHeight); }
 	
 	private static List<RenderCommand> renderCommands = new ArrayList<>();
 	
@@ -62,4 +64,5 @@ public abstract class Renderer {
 	public static int lineNumber(int stackTraceOffset) { 
 		return Thread.currentThread().getStackTrace()[2+stackTraceOffset].getLineNumber(); }
 	public static int lineNumber() { return lineNumber(1); }
+
 }

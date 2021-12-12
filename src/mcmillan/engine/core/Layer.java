@@ -14,7 +14,7 @@ public abstract class Layer {
 	public abstract void onUpdate(Timestep ts);
 
 //	public abstract void OnEvent(ZEvent e);
-	public abstract void OnZUIRender();
+	public abstract void OnZUIRender(Timestep ts);
 	
 	@Override
 	public String toString() {
