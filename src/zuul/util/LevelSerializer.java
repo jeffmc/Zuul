@@ -21,7 +21,7 @@ import zuul.world.Path;
 import zuul.world.Room;
 import zuul.world.TwoWayPath;
 
-public class LevelManager {
+public class LevelSerializer {
 
 	// TODO: Add CSV color scalar, similar to Int2 and IntTransform
 	

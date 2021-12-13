@@ -35,7 +35,8 @@ public class CommandParser {
         String word1;
         String word2;
 
-        System.out.print("> ");     // print prompt
+        System.out.println();
+        System.out.print("-> ");     // print prompt
 
         BufferedReader reader = 
             new BufferedReader(new InputStreamReader(System.in));
@@ -72,8 +73,8 @@ public class CommandParser {
     /**
      * Print out a list of valid command words.
      */
-    public void showCommands()
+    public void showHelp()
     {
-        commands.showAll();
+        commands.showHelp();
     }
 }

@@ -12,8 +12,13 @@ package zuul.cmd;
 
 public class CommandWords {
     // a constant array that holds all valid command words
-    private static final String validCommands[] = {
+    private static final String[] validCommands = {
         "go", "quit", "help"
+    };
+    private static final String[] commandDescriptions = {
+    		"go [exit] - Moves the player to the room using given path.",
+    		"quit - Quits the game.",
+    		"help - Shows this help message.",
     };
 
     /**
@@ -41,11 +46,12 @@ public class CommandWords {
     /*
      * Print all valid commands to System.out.
      */
-    public void showAll() 
+    public void showHelp() 
     {
-        for(int i = 0; i < validCommands.length; i++) {
-            System.out.print(validCommands[i] + "  ");
+    	if (validCommands.length != commandDescriptions.length) 
+    		System.err.println("IS THERE HELP FOR EVERY COMMAND IN CommandWords?");
+        for(int i = 0; i < commandDescriptions.length; i++) {
+            System.out.print("  " + commandDescriptions[i] + "\n");
         }
-        System.out.println();
     }
 }

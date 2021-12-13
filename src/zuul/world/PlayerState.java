@@ -4,18 +4,22 @@ import java.util.HashSet;
 
 public class PlayerState {
 	// TODO: inventory
-	private HashSet<Path> exploredPaths; // TODO: Add explore path functionality
-	private HashSet<Room> exploredRooms; // TODO: Add explore room functionality
-	private Room location;
+	private HashSet<Path> exploredPaths = new HashSet<>(); // TODO: Add explore path functionality
+	private HashSet<Room> exploredRooms = new HashSet<>(); // TODO: Add explore room functionality
+	private Room location = null;
 	
-	public PlayerState() {
-		location = null;
+	public PlayerState(Room spawn) {
+		goTo(spawn);
 	}
 	
-	public void setLocation(Room r, boolean utilizedPath) {
-		if (utilizedPath&&location!=null) {
-			// TODO: Add explored functionality here
-		}
+	public void traversedPath(Path p) {
+		assert p != null;
+		exploredPaths.add(p);
+	}
+	
+	public void goTo(Room r) {
+		assert r != null;
+		exploredRooms.add(r);
 		location = r;
 	}
 	

@@ -1,7 +1,10 @@
 package zuul;
 
+import java.io.File;
+
 import zuul.cmd.Command;
 import zuul.cmd.CommandParser;
+import zuul.util.LevelSerializer;
 import zuul.world.Level;
 import zuul.world.PlayerState;
 import zuul.world.Room;
@@ -27,9 +30,21 @@ public class Game  {
     private CommandParser cmdParser;
     private Level level;
     private PlayerState playerState;
-//    private Room currentRoom;
         
     public static final String NORTH = "north", EAST = "east", SOUTH = "south", WEST = "west";
+    
+    public static void main(String args[]) {
+		Level level = LevelSerializer.load(new File("GenesisReadOnly.yaml"));
+		
+		if (level != null) {
+			// Start cmd line game in own thread
+			Game instance = new Game(level);
+			instance.play();
+		} else {
+			System.err.println("Level loaded is null!");
+		}
+		LevelSerializer.save(level);
+    }
     
     /**
      * Create the game and initialize its internal map.
@@ -45,15 +60,14 @@ public class Game  {
      */
     public void play() 
     {            
-    	playerState = new PlayerState();
-        playerState.setLocation(level.getSpawn(), true);  // start game outside
+    	playerState = new PlayerState(level.getSpawn());
         printWelcome();
 
         // Enter the main command loop.  Here we repeatedly read commands and
         // execute them until the game is over.
                 
         boolean finished = false;
-        while (! finished) {
+        while (!finished) {
             Command command = cmdParser.getCommand();
             finished = processCommand(command);
         }
@@ -108,10 +122,9 @@ public class Game  {
     private void printHelp() 
     {
         System.out.println("You are lost. You are alone. You wander");
-        System.out.println("around at the university.");
         System.out.println();
         System.out.println("Your command words are:");
-        cmdParser.showCommands();
+        cmdParser.showHelp();
     }
 
     /** 
@@ -132,11 +145,15 @@ public class Game  {
         Room nextRoom = playerState.getLocation().getExit(direction);
 
         if (nextRoom == null)
-            System.out.println("There is no door!");
+            System.out.println("'" + direction + "' isn't a valid exit!");
         else {
-            playerState.setLocation(nextRoom, true);
-            System.out.println(nextRoom.getLongDescription());
+            playerState.goTo(nextRoom);
         }
+        printWhereAmI();
+    }
+    
+    private void printWhereAmI() {
+        System.out.println(playerState.getLocation().getLongDescription());
     }
 
     /** 
