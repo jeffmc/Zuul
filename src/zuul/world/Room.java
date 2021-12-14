@@ -4,6 +4,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import zuul.world.item.Inventory;
+import zuul.world.item.Item;
 import zuul.world.path.Path;
 
 import java.util.Set;
@@ -29,17 +31,26 @@ public class Room {
  	private Level level; // The parent level
 	private Set<Path> paths = new HashSet<Path>(); // Contains connections to neighbors
 	
+	private Inventory inventory; // Room item inventory
+	public Inventory getInventory() { return inventory; } // Getter
+	
 	/**
 	 * Create a room described "description". Initially, it has no exits.
 	 * "description" is something like "in a kitchen" or "in an open court 
 	 * yard".
 	 */
-	public Room(Level level, String name, String description) { 
+	public Room(Level level, String name, String description, Item... items) { 
 		this.level = level;
 		this.level.add(this);
 		this.name = name;
 	    this.description = description;
+	    this.inventory = new Inventory(this, items);
 	}
+	
+	// Initialize room without any items.
+	public Room(Level level, String name, String description) {
+		this(level,name,description, new Item[]{});
+	};
    
 	// Called after loading in from file.
 	public void calcExits() {
@@ -70,19 +81,20 @@ public class Room {
 	 *     You are in the kitchen.
 	 *     Exits: north west
 	 */
+	@Deprecated
 	public String getLongDescription() {
 	    return "You are " + description + ".\n" + getInventoryString() + "\n" + getExitString();
     }
 
-	/**
-	 * Return a string describing the room's exits, for example
-	 * "Exits: north west".
-	 */
-	
+	// Returns a string describing room's item inventory.
 	private String getInventoryString() {
 		return "Items:"; // Add room inventory printing.
 	}
 	
+	/**
+	 * Return a string describing the room's exits, for example
+	 * "Exits: north west".
+	 */
 	private String getExitString()
 	{
 	    String returnString = "Exits:";
@@ -94,7 +106,7 @@ public class Room {
 	
 	// Called when the player enters this room, meant to only print string.
 	public void printEntered() {
-        System.out.println(getLongDescription());
+        System.out.println("You are " + description + ".\n" + inventory.getAsString("  ") + "\n" + getExitString());
 	}
 
     /**

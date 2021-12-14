@@ -2,10 +2,11 @@ package zuul;
 
 import zuul.cmd.Command;
 import zuul.cmd.CommandParser;
-import zuul.util.LevelManager;
+import zuul.cmd.CommandWords;
 import zuul.world.Level;
 import zuul.world.PlayerState;
 import zuul.world.Room;
+import zuul.world.item.Item;
 
 /**
  *  This class is the main class of the "World of Zuul" application. 
@@ -25,24 +26,20 @@ import zuul.world.Room;
  */
 
 public class Game  {
-    private CommandParser cmdParser;
     private Level level;
     private PlayerState playerState;
     
     /**
      * Create the game and initialize its internal map.
      */
-    public Game(Level level) 
-    {
+    public Game(Level level) {
     	this.level = level;
-        cmdParser = new CommandParser();
     }
     
     /**
      *  Main play routine.  Loops until end of play.
      */
-    public void play() 
-    {            
+    public void play() {            
     	playerState = new PlayerState(level.getSpawn());
         printWelcome();
 
@@ -51,7 +48,7 @@ public class Game  {
                 
         boolean finished = false;
         while (!finished) {
-            Command command = cmdParser.getCommand();
+            Command command = CommandParser.getCommand();
             finished = processCommand(command);
         }
         System.out.println("Thank you for playing.  Good bye.");
@@ -85,13 +82,20 @@ public class Game  {
         }
 
         String commandWord = command.getCommandWord();
-        if (commandWord.equals("help"))
+        if (commandWord.equals(CommandWords.HELP))
             printHelp();
-        else if (commandWord.equals("go"))
+        else if (commandWord.equals(CommandWords.GO))
             goRoom(command);
-        else if (commandWord.equals("quit")) {
+        else if (commandWord.equals(CommandWords.QUIT))
             wantToQuit = quit(command);
-        }
+        else if (commandWord.equals(CommandWords.TEST))
+        	System.out.println(Item.getItemFromString(command.getSecondWord()));
+        else if (commandWord.equals(CommandWords.PICKUP))
+        	System.out.println("HANDLE PICKUP"); // TODO: Pickup command logic
+        else if (commandWord.equals(CommandWords.DROP))
+        	System.out.println("HANDLE DROP"); // TODO: Drop command logic
+        else if (commandWord.equals(CommandWords.INV))
+        	System.out.println("HANDLE INV"); // TODO: Inv command logic
         return wantToQuit;
     }
 
@@ -107,7 +111,7 @@ public class Game  {
         System.out.println("You are lost. You are alone. You wander");
         System.out.println();
         System.out.println("Your command words are:");
-        cmdParser.showHelp();
+        CommandWords.showHelp();
     }
 
     /** 
@@ -127,10 +131,10 @@ public class Game  {
         // Try to leave current room.
         Room nextRoom = playerState.getLocation().getExit(direction);
 
-        if (nextRoom == null)
-            System.out.println("'" + direction + "' isn't a valid exit!");
-        else {
+        if (nextRoom != null)
             playerState.goTo(nextRoom);
+        else {
+            System.out.println("'" + direction + "' isn't a valid exit!");
         }
         printWhereAmI();
     }

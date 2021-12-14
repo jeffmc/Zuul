@@ -22,18 +22,9 @@ import java.util.StringTokenizer;
 
 public class CommandParser {
 
-    private CommandWords commands;  // holds all valid command words
-
-    public CommandParser() 
-    {
-        commands = new CommandWords();
-    }
-
-    public Command getCommand() 
+    public static Command getCommand() 
     {
         String inputLine = "";   // will hold the full input line
-        String word1;
-        String word2;
 
         System.out.println();
         System.out.print("-> ");     // print prompt
@@ -50,31 +41,18 @@ public class CommandParser {
 
         StringTokenizer tokenizer = new StringTokenizer(inputLine);
 
+        int length = tokenizer.countTokens();
+        String[] words = new String[length];
+        
+        for (int i=0;i<length;i++) {
+        	words[i] = tokenizer.nextToken();
+        }
+        
         if(tokenizer.hasMoreTokens())
-            word1 = tokenizer.nextToken();      // get first word
-        else
-            word1 = null;
-        if(tokenizer.hasMoreTokens())
-            word2 = tokenizer.nextToken();      // get second word
-        else
-            word2 = null;
-
+        	throw new IllegalStateException("");
         // note: we just ignore the rest of the input line.
 
-        // Now check whether this word is known. If so, create a command
-        // with it. If not, create a "null" command (for unknown command).
-
-        if(commands.isCommand(word1))
-            return new Command(word1, word2);
-        else
-            return new Command(null, word2);
-    }
-
-    /**
-     * Print out a list of valid command words.
-     */
-    public void showHelp()
-    {
-        commands.showHelp();
+        // Construct command using tokenized input.
+        return new Command(words);        	
     }
 }

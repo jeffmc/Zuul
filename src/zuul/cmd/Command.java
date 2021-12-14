@@ -19,18 +19,25 @@ package zuul.cmd;
  */
 
 public class Command {
-    private String commandWord;
-    private String secondWord;
+    private String[] words;
+    private boolean isCommand = false;
 
     /**
      * Create a command object. First and second word must be supplied, but
      * either one (or both) can be null. The command word should be null to
      * indicate that this was a command that is not recognised by this game.
      */
-    public Command(String firstWord, String secondWord)
-    {
-        commandWord = firstWord;
-        this.secondWord = secondWord;
+    public Command(String[] tokens) {
+    	this.words = tokens;
+    	if (words.length > 0) {
+    		if (CommandWords.isCommand(words[0])) {
+    			isCommand = true;
+    		} else {
+    			isCommand = false;
+    		}
+    	} else {
+    		isCommand = false;
+    	}
     }
 
     /**
@@ -39,7 +46,7 @@ public class Command {
      */
     public String getCommandWord()
     {
-        return commandWord;
+        return words.length > 0 ? words[0] : null;
     }
 
     /**
@@ -48,15 +55,20 @@ public class Command {
      */
     public String getSecondWord()
     {
-        return secondWord;
+        return words.length > 1 ? words[1] : null;
     }
 
+    public String getWordAt(int idx) {
+    	if (idx < 0) throw new IllegalArgumentException("Cannot have negative command word index");
+        return words.length > idx ? words[idx] : null;
+    }
+    
     /**
      * Return true if this command was not understood.
      */
     public boolean isUnknown()
     {
-        return (commandWord == null);
+        return (!isCommand);
     }
 
     /**
@@ -64,7 +76,7 @@ public class Command {
      */
     public boolean hasSecondWord()
     {
-        return (secondWord != null);
+        return words.length > 1;
     }
 }
 
