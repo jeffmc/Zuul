@@ -1,4 +1,7 @@
-package zuul.world;
+package zuul.world.path;
+
+import zuul.world.PlayerState;
+import zuul.world.Room;
 
 public class TwoWayPath extends Path {
 
@@ -27,8 +30,8 @@ public class TwoWayPath extends Path {
 	}
 
 	@Override
-	public PathType getType() {
-		return PathType.TWO_WAY;
+	public Type getType() {
+		return Type.TWO_WAY;
 	}
 
 }

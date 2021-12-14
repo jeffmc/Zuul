@@ -2,6 +2,8 @@ package zuul.world;
 
 import java.util.HashSet;
 
+import zuul.world.path.Path;
+
 public class PlayerState {
 	// TODO: inventory
 	private HashSet<Path> exploredPaths = new HashSet<>(); // TODO: Add explore path functionality

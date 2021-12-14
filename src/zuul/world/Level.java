@@ -5,38 +5,28 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import mcmillan.engine.math.Int2;
+import zuul.world.path.Path;
 
 public class Level {
-	// Serialized
+	
 	private String name;
 	private List<Room> rooms; // List of all rooms in the level.
 	private Room spawnRoom; // Room to spawn in, start the player in.
-	
-	// Not serialized
-    private boolean loadingComplete; // Do not trigger repaints while this is true
-    private Set<Path> paths;
+	private Set<Path> paths;
 	
 	public Level(String name, boolean loadingComplete) {
 		this.name = name;
 		rooms = new ArrayList<Room>();
 		paths = new HashSet<Path>();
-		
-		this.loadingComplete = loadingComplete;
 	}
 
+	public void calcExits() {
+		for (Room r : rooms)
+			r.calcExits();
+	}
+	
 	public Level(String name) {
 		this(name, true);
-	}
-	
-	public void completedLoading() {
-		loadingComplete = true;
-		repaint();
-	}
-	
-	public void repaint() {
-//		if (loadingComplete)
-//			repaintSignal.run();
 	}
 
 	public void setSpawn(Room r) { // Checks if this level contains room first, then assigns spawn to room.
@@ -51,7 +41,6 @@ public class Level {
 	
 	public void add(Room r) {
 		rooms.add(r);
-		r.setLevel(this);
 	}
 	
 	public void add(Room... rs) {
@@ -60,10 +49,6 @@ public class Level {
 
 	public String getName() {
 		return name;
-	}
-	
-	private void setName(String name) {
-		this.name = name;
 	}
     
     public List<Room> getRooms() {
@@ -82,11 +67,5 @@ public class Level {
     
     public Set<Path> getPaths() {
     	return paths;
-    }
-    
-    public Room getRoom(Int2 p) {
-    	for (Room r : rooms) 
-    		if (r.contains(p)) return r;
-    	return null;
     }
 }

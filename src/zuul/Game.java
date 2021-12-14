@@ -1,10 +1,8 @@
 package zuul;
 
-import java.io.File;
-
 import zuul.cmd.Command;
 import zuul.cmd.CommandParser;
-import zuul.util.LevelSerializer;
+import zuul.util.LevelManager;
 import zuul.world.Level;
 import zuul.world.PlayerState;
 import zuul.world.Room;
@@ -30,21 +28,6 @@ public class Game  {
     private CommandParser cmdParser;
     private Level level;
     private PlayerState playerState;
-        
-    public static final String NORTH = "north", EAST = "east", SOUTH = "south", WEST = "west";
-    
-    public static void main(String args[]) {
-		Level level = LevelSerializer.load(new File("GenesisReadOnly.yaml"));
-		
-		if (level != null) {
-			// Start cmd line game in own thread
-			Game instance = new Game(level);
-			instance.play();
-		} else {
-			System.err.println("Level loaded is null!");
-		}
-		LevelSerializer.save(level);
-    }
     
     /**
      * Create the game and initialize its internal map.
@@ -84,7 +67,7 @@ public class Game  {
         System.out.println("Adventure is a new, incredibly boring adventure game.");
         System.out.println("Type 'help' if you need help.");
         System.out.println();
-        System.out.println(playerState.getLocation().getLongDescription());
+        printWhereAmI();
     }
 
     /**
@@ -153,7 +136,7 @@ public class Game  {
     }
     
     private void printWhereAmI() {
-        System.out.println(playerState.getLocation().getLongDescription());
+    	playerState.getLocation().printEntered();
     }
 
     /** 

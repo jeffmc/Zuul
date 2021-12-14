@@ -1,8 +1,9 @@
-package zuul.world;
+package zuul.world.path;
+
+import zuul.world.PlayerState;
+import zuul.world.Room;
 
 public abstract class Path {
-	// Serialized fields
-	// getType() is also serialized.
 	private Room a, b;
 	private String aName, bName;
 	
@@ -37,17 +38,33 @@ public abstract class Path {
 		return bName;
 	}
 
+	// Returns true if X has potential to access Room Y
+	public final boolean potentialTo(Room x, Room y) {
+		return ((a==x&&b==y&&potentialToB()) || (a==y&&b==x&&potentialToA()));
+	}
+	
+	// Returns true if X has immediate to access Room Y
+	public final boolean potentialTo(PlayerState ps, Room x, Room y) {
+		return ((a==x&&b==y&&accessToB(ps)) || (a==y&&b==x&&accessToA(ps)));
+	}
+	
+	// Returns true if Room B may access A, right now or in the future.
 	public abstract boolean potentialToA();
-	
+
+	// Returns true if Room A may access B, right now or in the future.
 	public abstract boolean potentialToB();
-	
+
+	// Returns true if Room B can access A given current player state.
 	public abstract boolean accessToA(PlayerState ps);
-	
+
+	// Returns true if Room A can access B given current player state.
 	public abstract boolean accessToB(PlayerState ps);
 
-	public abstract PathType getType();
+	// Return type of this path
+	public abstract Type getType();
 	
-	public enum PathType {
+	// Path Types
+	public enum Type {
 		TWO_WAY,
 		ONE_WAY,
 		CONDITIONAL;

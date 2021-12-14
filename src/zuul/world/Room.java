@@ -4,8 +4,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import mcmillan.engine.math.Int2;
-import mcmillan.engine.math.IntTransform;
+import zuul.world.path.Path;
 
 import java.util.Set;
 
@@ -24,34 +23,23 @@ import java.util.Set;
  */
 
 public class Room {
-	// Serialized
 	private String name; // name of room (used in level saving-loading)
 	private String description; // description of the room
-	private HashMap<String, Room> exits; // stores exits of this room.
-	private IntTransform transform; // position and size (used by reference in renderer.)
-	
-	// Not-serialized
-//	private Renderable.Shape shape = Renderable.Shape.BOX; TODO: Reimplement shape
+	private HashMap<String, Room> exits = new HashMap<>(); // stores exits of this room.
  	private Level level; // The parent level
-	private Set<Path> paths; // Contains connections to neighbors
+	private Set<Path> paths = new HashSet<Path>(); // Contains connections to neighbors
 	
 	/**
 	 * Create a room described "description". Initially, it has no exits.
 	 * "description" is something like "in a kitchen" or "in an open court 
 	 * yard".
 	 */
-	public Room(String name, String description, IntTransform transform) { 
+	public Room(Level level, String name, String description) { 
+		this.level = level;
+		this.level.add(this);
 		this.name = name;
 	    this.description = description;
-	    this.transform = transform;
-	    
-	    exits = new HashMap<String, Room>();
-	    paths = new HashSet<Path>();
 	}
-
-    public Room(String name, String description, int x, int y, int width, int height) {
-    	this(name, description, new IntTransform(x, y, width, height));
-    }
    
 	// Called after loading in from file.
 	public void calcExits() {
@@ -70,14 +58,6 @@ public class Room {
 					this.exits.put(isa?p.getAName():p.getBName(), isa?p.getB():p.getA());
 		}
 	}
-	
-	// Has immediate path to target, not necessarily access to.
-	private boolean hasPathTo(Room target) {
-		for (Path p : paths) 
-			if ((p.getA()==this&&p.getB()==target) ||
-				(p.getA()==target&&p.getB()==this)) return true;
-		return false;
-	}
 
 	// Return the name of the room ( defined in the constructor).
 	public String getName() { return name; }
@@ -91,20 +71,30 @@ public class Room {
 	 *     Exits: north west
 	 */
 	public String getLongDescription() {
-	    return "You are " + description + ".\n" + getExitString();
+	    return "You are " + description + ".\n" + getInventoryString() + "\n" + getExitString();
     }
 
 	/**
 	 * Return a string describing the room's exits, for example
 	 * "Exits: north west".
 	 */
+	
+	private String getInventoryString() {
+		return "Items:"; // Add room inventory printing.
+	}
+	
 	private String getExitString()
 	{
 	    String returnString = "Exits:";
 	    Set<Entry<String, Room>> entries = exits.entrySet();
 	    for(Entry<String, Room> e : entries)
-	        returnString += " " + e.getKey() + " (" + e.getValue().getName() + "),";
+	        returnString += "\n  " + e.getKey() + " (" + e.getValue().getName() + ")";
 	    return returnString;
+	}
+	
+	// Called when the player enters this room, meant to only print string.
+	public void printEntered() {
+        System.out.println(getLongDescription());
 	}
 
     /**
@@ -117,50 +107,11 @@ public class Room {
     
     // Return parent level
 	public Level getLevel() { return level; }
-
-	// Set parent level, should only be called by level.add()
-	public void setLevel(Level level) { this.level = level; }
-
-	public int getX() { return transform.position.x; }
-
-	public void setX(int x) { transform.position.x = x; }
-
-	public int getY() { return transform.position.y; }
-
-	public void setY(int y) { transform.position.y = y; }
-
-	public int getWidth() { return transform.scale.x; }
-
-	public void setWidth(int width) { transform.scale.x = width; }
-
-	public int getHeight() { return transform.scale.y; }
 	
-	public void setHeight(int height) { transform.scale.y = height; }
-
-	public Int2 getPosition() { return transform.position; }
-	
-	public void setPosition(Int2 position) { transform.position.set(position); }
-
-	public Int2 getSize() { return transform.scale; }
-	
-	public void setSize(Int2 size) { transform.scale.set(size); }
-
-	public IntTransform getTransform() { return transform; }
-	
-	public void setTransform(IntTransform o) { transform.set(o); }
-	
-	public void setTransform(int x, int y, int width, int height) { transform.set(x, y, width, height); }
-	
-	protected void addPath(Path p) { paths.add(p); }
+	public void addPath(Path p) { paths.add(p); }
 	
 	public Set<Path> getPaths() { return paths; }
 
 	public boolean isSpawnpoint() { return level.getSpawn() == this; }
-	
-	public boolean contains(Int2 p) { // TODO: Doesn't work for negative scale rect or have oval support
-		Int2 o = new Int2(transform.position).sub(new Int2(transform.scale).div(2)); // o for origin, (UPPER-LEFT)
-		Int2 s = transform.scale;
-		return p.x>=o.x&&p.x<=o.x+s.x&&p.y>=o.y&&p.y<=o.y+s.y;
-	}
 }
 
