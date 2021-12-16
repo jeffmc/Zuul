@@ -3,7 +3,7 @@ package zuul;
 import zuul.util.LevelManager;
 import zuul.world.Level;
 
-// The Zuul project.
+// The Zuul game, modified by Jeff McMillan.
 // Launcher class, only used for creating and running game/level instances.
 
 public class Launcher {

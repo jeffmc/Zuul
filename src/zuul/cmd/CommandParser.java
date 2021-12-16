@@ -22,6 +22,7 @@ import java.util.StringTokenizer;
 
 public class CommandParser {
 
+	// Get command from console input and return command object.
     public static Command getCommand() 
     {
         String inputLine = "";   // will hold the full input line
@@ -39,18 +40,14 @@ public class CommandParser {
                                 + exc.getMessage());
         }
 
+        // Tokenize string into word array
         StringTokenizer tokenizer = new StringTokenizer(inputLine);
-
         int length = tokenizer.countTokens();
         String[] words = new String[length];
         
         for (int i=0;i<length;i++) {
         	words[i] = tokenizer.nextToken();
         }
-        
-        if(tokenizer.hasMoreTokens())
-        	throw new IllegalStateException("");
-        // note: we just ignore the rest of the input line.
 
         // Construct command using tokenized input.
         return new Command(words);        	

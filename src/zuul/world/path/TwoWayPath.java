@@ -3,6 +3,8 @@ package zuul.world.path;
 import zuul.world.PlayerState;
 import zuul.world.Room;
 
+// Always enabled two-way path.
+
 public class TwoWayPath extends Path {
 
 	public TwoWayPath(Room _a, Room _b, String aName, String bName) {

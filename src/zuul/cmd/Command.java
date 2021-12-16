@@ -1,4 +1,7 @@
 package zuul.cmd;
+
+import zuul.Game;
+
 /**
  * This class is the main class of the "World of Zuul" application. 
  * "World of Zuul" is a very simple, text based adventure game.  
@@ -19,8 +22,8 @@ package zuul.cmd;
  */
 
 public class Command {
-    private String[] words;
-    private boolean isCommand = false;
+    private String[] words; // Each word within the user-inputted command.
+    private boolean isCommand = false; // True if valid command, initialized in constructor.
 
     /**
      * Create a command object. First and second word must be supplied, but
@@ -30,7 +33,7 @@ public class Command {
     public Command(String[] tokens) {
     	this.words = tokens;
     	if (words.length > 0) {
-    		if (CommandWords.isCommand(words[0])) {
+    		if (CommandWords.isCommand(this)) {
     			isCommand = true;
     		} else {
     			isCommand = false;
@@ -77,6 +80,13 @@ public class Command {
     public boolean hasSecondWord()
     {
         return words.length > 1;
+    }
+    
+    // Return true if this command word matches the target string using any case 
+    public boolean matches(String target) {
+    	if (getCommandWord() != null)
+    		return Game.blurryMatch(getCommandWord(), target);
+		return false;
     }
 }
 

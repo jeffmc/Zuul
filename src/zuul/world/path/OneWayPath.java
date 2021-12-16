@@ -3,6 +3,9 @@ package zuul.world.path;
 import zuul.world.PlayerState;
 import zuul.world.Room;
 
+// Always enabled one-way path, with a parent and child.
+// The parent is allowed to traverse, child is not.
+
 public class OneWayPath extends Path {
 	 // Room "child" never has access to Room "parent".
 	public OneWayPath(Room parent, Room child, String aName, String bName) {

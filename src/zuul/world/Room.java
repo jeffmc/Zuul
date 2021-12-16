@@ -1,11 +1,14 @@
 package zuul.world;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import zuul.Game;
 import zuul.world.item.Inventory;
 import zuul.world.item.Item;
+import zuul.world.path.ExitPair;
 import zuul.world.path.Path;
 
 import java.util.Set;
@@ -27,7 +30,7 @@ import java.util.Set;
 public class Room {
 	private String name; // name of room (used in level saving-loading)
 	private String description; // description of the room
-	private HashMap<String, Room> exits = new HashMap<>(); // stores exits of this room.
+	private HashMap<String, ExitPair> exits = new HashMap<>(); // stores exits of this room.
  	private Level level; // The parent level
 	private Set<Path> paths = new HashSet<Path>(); // Contains connections to neighbors
 	
@@ -37,7 +40,10 @@ public class Room {
 	/**
 	 * Create a room described "description". Initially, it has no exits.
 	 * "description" is something like "in a kitchen" or "in an open court 
-	 * yard".
+	 * yard". 
+	 * Initializes room inventory.
+	 * Adds items to room if possible.
+	 * Description shown in this format to the user "You are [description]."
 	 */
 	public Room(Level level, String name, String description, Item... items) { 
 		this.level = level;
@@ -55,18 +61,19 @@ public class Room {
 	// Called after loading in from file.
 	public void calcExits() {
 		if (exits != null) { exits.clear(); } else {
-			exits = new HashMap<String, Room>();
+			exits = new HashMap<String, ExitPair>();
 		}
 		for (Path p : paths) {
 			boolean isa;
-			if (p.getA()==this) { 
+			if (p.getA()==this)
 				isa = true; 
-			} else if (p.getB()==this) { 
+			else if (p.getB()==this)
 				isa = false; 
-			} else { throw new IllegalStateException("Path doesn't contain this room as A or B!"); }
+			else throw new IllegalStateException("Path doesn't contain this room as A or B!");
+			
 			if ((isa&&p.potentialToB())||
 				((!isa)&&p.potentialToA())) 
-					this.exits.put(isa?p.getAName():p.getBName(), isa?p.getB():p.getA());
+					this.exits.put(isa?p.getAName():p.getBName(), new ExitPair(isa?p.getB():p.getA(), p));
 		}
 	}
 
@@ -75,21 +82,6 @@ public class Room {
     
 	// Return the description of the room ( defined in the constructor).c
 	public String getShortDescription() { return description; }
-
-	/**
-	 * Return a long description of this room, in the form:
-	 *     You are in the kitchen.
-	 *     Exits: north west
-	 */
-	@Deprecated
-	public String getLongDescription() {
-	    return "You are " + description + ".\n" + getInventoryString() + "\n" + getExitString();
-    }
-
-	// Returns a string describing room's item inventory.
-	private String getInventoryString() {
-		return "Items:"; // Add room inventory printing.
-	}
 	
 	/**
 	 * Return a string describing the room's exits, for example
@@ -98,32 +90,50 @@ public class Room {
 	private String getExitString()
 	{
 	    String returnString = "Exits:";
-	    Set<Entry<String, Room>> entries = exits.entrySet();
-	    for(Entry<String, Room> e : entries)
-	        returnString += "\n  " + e.getKey() + " (" + e.getValue().getName() + ")";
+	    Set<Entry<String, ExitPair>> entries = exits.entrySet();
+	    for(Entry<String, ExitPair> e : entries)
+	        returnString += "\n  " + e.getKey() + " (" + e.getValue().room().getName() + ")";
 	    return returnString;
 	}
 	
-	// Called when the player enters this room, meant to only print string.
+	// Called when the player enters this room, describes the state of the room (inventory) and displays exits.
 	public void printEntered() {
-        System.out.println("You are " + description + ".\n" + inventory.getAsString("  ") + "\n" + getExitString());
+        System.out.println("You are " + description + ".");
+        System.out.println("Items:\n" + inventory.getAsString("  "));
+		System.out.println(getExitString());
 	}
 
     /**
      * Return the room that is reached if we go from this room in direction
      * "direction". If there is no room in that direction, return null.
      */
-    public Room getExit(String direction) { return (Room)exits.get(direction); }
+    public Room getExit(String direction) { 
+    	ExitPair ep = getExitPair(direction);
+    	if (ep != null) return ep.room();
+    	return null;
+    }
+    
+    // Return ExitPair at direction or null if not found.
+    public ExitPair getExitPair(String direction) { 
+    	for (Entry<String, ExitPair> e : exits.entrySet())
+    		if (Game.blurryMatch(e.getKey(), direction))
+				return e.getValue();
+    	return null;
+    }
 
-    public Map<String, Room> getExits() { return exits; }
+    // Get all exits this room has in an unmodifiable map.
+    public Map<String, ExitPair> getExits() { return Collections.unmodifiableMap(exits); }
     
     // Return parent level
 	public Level getLevel() { return level; }
 	
+	// Add a path to this room
 	public void addPath(Path p) { paths.add(p); }
 	
-	public Set<Path> getPaths() { return paths; }
+	// Get paths this room contains.
+	public Set<Path> getPaths() { return Collections.unmodifiableSet(paths); }
 
-	public boolean isSpawnpoint() { return level.getSpawn() == this; }
+	// Return if this room is the spawn for the parent level.
+	public boolean isSpawn() { return level.getSpawn() == this; }
 }
 

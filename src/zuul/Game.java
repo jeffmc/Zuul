@@ -6,7 +6,11 @@ import zuul.cmd.CommandWords;
 import zuul.world.Level;
 import zuul.world.PlayerState;
 import zuul.world.Room;
+import zuul.world.item.Inventory;
 import zuul.world.item.Item;
+import zuul.world.path.Path;
+import zuul.world.path.ConditionalTwoWayPath;
+import zuul.world.path.ExitPair;
 
 /**
  *  This class is the main class of the "World of Zuul" application. 
@@ -17,7 +21,7 @@ import zuul.world.item.Item;
  *  To play this game, create an instance of this class and call the "play"
  *  method.
  * 
- *  This main class creates and initialises all the others: it creates all
+ *  This main class creates and initializes all the others: it creates all
  *  rooms, creates the parser and starts the game.  It also evaluates and
  *  executes the commands that the parser returns.
  * 
@@ -26,11 +30,16 @@ import zuul.world.item.Item;
  */
 
 public class Game  {
-    private Level level;
-    private PlayerState playerState;
+    // Return true if strings are equal when converted to lowercase and whitespace is trimmed. TODO: Move to a util/misc class.
+    public static boolean blurryMatch(String a, String b) {
+		return a.trim().toLowerCase().equals(b.trim().toLowerCase());
+    }
+    
+    private Level level; // Current level being played by this game instance, contains all rooms, paths, and items.
+    private PlayerState playerState; // Current player playing within the above level.
     
     /**
-     * Create the game and initialize its internal map.
+     * Create the game and specify level to play.
      */
     public Game(Level level) {
     	this.level = level;
@@ -50,21 +59,12 @@ public class Game  {
         while (!finished) {
             Command command = CommandParser.getCommand();
             finished = processCommand(command);
+            if (this.level.checkWin(playerState)) {
+            	System.out.println("You have collected all metals, congrats!");
+            	finished = true;
+            }
         }
-        System.out.println("Thank you for playing.  Good bye.");
-    }
-
-    /**
-     * Print out the opening message for the player.
-     */
-    private void printWelcome()
-    {
-        System.out.println();
-        System.out.println("Welcome to Adventure!");
-        System.out.println("Adventure is a new, incredibly boring adventure game.");
-        System.out.println("Type 'help' if you need help.");
-        System.out.println();
-        printWhereAmI();
+        System.out.println("Thank you for playing. Good bye.");
     }
 
     /**
@@ -81,27 +81,39 @@ public class Game  {
             return false;
         }
 
-        String commandWord = command.getCommandWord();
-        if (commandWord.equals(CommandWords.HELP))
+        if (command.matches(CommandWords.HELP))
             printHelp();
-        else if (commandWord.equals(CommandWords.GO))
+        else if (command.matches(CommandWords.GO))
             goRoom(command);
-        else if (commandWord.equals(CommandWords.QUIT))
+        else if (command.matches(CommandWords.QUIT))
             wantToQuit = quit(command);
-        else if (commandWord.equals(CommandWords.TEST))
-        	System.out.println(Item.getItemFromString(command.getSecondWord()));
-        else if (commandWord.equals(CommandWords.PICKUP))
-        	System.out.println("HANDLE PICKUP"); // TODO: Pickup command logic
-        else if (commandWord.equals(CommandWords.DROP))
-        	System.out.println("HANDLE DROP"); // TODO: Drop command logic
-        else if (commandWord.equals(CommandWords.INV))
-        	System.out.println("HANDLE INV"); // TODO: Inv command logic
+        else if (command.matches(CommandWords.PICKUP))
+        	pickupItem(command);
+        else if (command.matches(CommandWords.DROP))
+        	dropItem(command);
+        else if (command.matches(CommandWords.INV))
+        	printInventory();
+        else if (command.matches(CommandWords.WHEREAMI))
+        	printWhereAmI();
         return wantToQuit;
     }
-
-    // implementations of user commands:
+    // ________________________________________________________
+    // USER COMMANDS:
 
     /**
+	 * Print out the opening message for the player.
+	 */
+	private void printWelcome()
+	{
+	    System.out.println();
+	    System.out.println("Welcome to The Town!");
+	    System.out.println("The Town is a brand-new, incredibly exiciting adventure game.");
+	    System.out.println("Type 'help' if you need help.");
+	    System.out.println();
+	    printWhereAmI();
+	}
+
+	/**
      * Print out some help information.
      * Here we print some stupid, cryptic message and a list of the 
      * command words.
@@ -129,16 +141,22 @@ public class Game  {
         String direction = command.getSecondWord();
 
         // Try to leave current room.
-        Room nextRoom = playerState.getLocation().getExit(direction);
-
-        if (nextRoom != null)
-            playerState.goTo(nextRoom);
-        else {
+        ExitPair pair = playerState.getLocation().getExitPair(direction);
+        
+        if (pair != null) { // Determine if given direction is valid.
+            Room r = pair.room();
+            Path p = pair.path();
+        	if (pair.path().accessTo(playerState, playerState.getLocation(), r)) { // Check if path allows access to room through exit
+        		playerState.goTo(r);
+                printWhereAmI();	
+        	} else if (p instanceof ConditionalTwoWayPath) // Print tip/clue if possible.
+        		System.out.println(ConditionalTwoWayPath.class.cast(p).message());
+        } else {
             System.out.println("'" + direction + "' isn't a valid exit!");
         }
-        printWhereAmI();
     }
     
+    // Prints the room entered message.
     private void printWhereAmI() {
     	playerState.getLocation().printEntered();
     }
@@ -157,4 +175,50 @@ public class Game  {
         else
             return true;  // signal that we want to quit
     }
+    
+    // Pickup item specified by command if the current room contains it, otherwise tell user it wasn't found.
+    private void pickupItem(Command command) {
+    	if (!command.hasSecondWord()) {
+    		System.out.println("Pickup what?");
+    		return;
+    	}
+    	Room currentRoom = playerState.getLocation();
+    	Inventory roomInventory = currentRoom.getInventory();
+    	Item foundItem = roomInventory.getItemFromString(command.getSecondWord());
+    	if (foundItem != null) {
+    		foundItem.moveTo(playerState.getInventory());
+    		System.out.println("Picked up " + foundItem.getName() + "!");
+    	} else {
+    		System.out.println("Couldn't find '" + command.getSecondWord() + "' in " + currentRoom.getName());
+    	}
+    } 
+    
+    // Drop item specified by command if the player is holding it, otherwise tell user it wasn't found.
+    private void dropItem(Command command) {
+    	if (!command.hasSecondWord()) {
+    		System.out.println("Drop what?");
+    		return;
+    	}
+    	Room currentRoom = playerState.getLocation();
+    	Inventory roomInventory = currentRoom.getInventory();
+    	
+    	Inventory playerInventory = playerState.getInventory();
+    	Item foundItem = playerInventory.getItemFromString(command.getSecondWord());
+    	if (foundItem != null) {
+        	if (foundItem.isUndroppable()) {
+        		System.out.println(foundItem.getName() + " cannot be dropped!");
+        	} else {
+	    		foundItem.moveTo(roomInventory);
+	    		System.out.println("Dropped up " + foundItem.getName() + "!");
+        	}
+    	} else {
+    		System.out.println("Couldn't find '" + command.getSecondWord() + "' in your inventory!");
+    	} 
+	} 
+    
+    // Print player's inventory contents.
+    private void printInventory() {
+        System.out.println("Your inventory:\n" + playerState.getInventory().getAsString("  "));
+    } 
+    
 }

@@ -1,35 +1,42 @@
 package zuul.world.item;
 
+import zuul.world.Room;
+
+// Items can be transferred from inventory to inventory, but never destroyed.
+// All items are stored within an inventory, whether player or room.
+
 public class Item {
-	// Declaration and initialization of items.
-	public static Item SWORD = new Item("Sword");
-	
-	// Registry of all items
-	public static Item[] registry = { SWORD };
-			
-	private String name;
+	private String name; // Name of item, used in console output often (NEEDS TO BE SINGLE WORD NOW) TODO: Multi-word item names?
 	public String getName() { return name; } // Returns item name.
 	
 	private Inventory parentInventory = null; // Reference to parent inventory.
 	public Inventory getInventory() { return parentInventory; } // Returns parent inventory containing this item.
 	protected void setInventory(Inventory i) { parentInventory = i; } // Called by Inventory.moveItemTo(...), and Inventory(Room, Item[]) constructor.
 	
-	public Item(String name) {
+	private boolean undroppable; // True if the player is prevented from dropping this item once picked up.
+	public boolean isUndroppable() { return undroppable; } // Getter
+	
+	// Constructor for Item
+	public Item(Inventory newInventory, String name, boolean undroppable) {
 		this.name = name;
+		this.undroppable = undroppable;
+		newInventory.addItems(this); // Add this item to parentInventory.
 	}
 	
+	// Overloaded constructors
+	public Item(Room room, String name, boolean undroppable) {
+		this(room.getInventory(), name, undroppable);
+	}
+	public Item(Room room, String name) {
+		this(room.getInventory(), name, false);
+	}
+	
+	// Move this item to a new inventory, calls parentInventory.moveItemTo
 	public void moveTo(Inventory i) {
 		parentInventory.moveItemTo(this, i);
 	}
 	
-	// Allows any-case string to be parsed into a reference to an existing item within Item.registry, or null if not found;
-	public static Item getItemFromString(String name) {
-		for (Item i : registry)
-			if (i.getName().toLowerCase().equals(name.trim().toLowerCase()))
-				return i;
-		return null;
-	}
-	
+	// Override toString for easier debugging, outputted string now contains item name.
 	@Override
 	public String toString() {
 		return super.toString() + "['" + name + "']";

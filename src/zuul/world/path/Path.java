@@ -3,11 +3,14 @@ package zuul.world.path;
 import zuul.world.PlayerState;
 import zuul.world.Room;
 
+// The abstract class Path is meant to be extended to create new types of paths, with varying levels of accessibility and complexity.
+// All paths contain two rooms, and a name for the path from the perspective of each room.
+// Paths have potential and access methods to determine whether or not the player may traverse.
+
 public abstract class Path {
-	private Room a, b;
-	private String aName, bName;
+	private Room a, b; // Path ends.
+	private String aName, bName; // Perspective names from each room
 	
-	// TODO: Add conditional paths (based on player inventory, explored paths/rooms, etc.)
 	public Path(Room _a, Room _b, String _aName, String _bName) {
 		this.a = _a;
 		this.b = _b;
@@ -44,7 +47,7 @@ public abstract class Path {
 	}
 	
 	// Returns true if X has immediate to access Room Y
-	public final boolean potentialTo(PlayerState ps, Room x, Room y) {
+	public final boolean accessTo(PlayerState ps, Room x, Room y) {
 		return ((a==x&&b==y&&accessToB(ps)) || (a==y&&b==x&&accessToA(ps)));
 	}
 	
@@ -67,6 +70,7 @@ public abstract class Path {
 	public enum Type {
 		TWO_WAY,
 		ONE_WAY,
-		CONDITIONAL;
+		CONDITIONAL, 
+		CONDITIONAL_TWO_WAY;
 	}
 }
