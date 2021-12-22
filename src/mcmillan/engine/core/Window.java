@@ -67,18 +67,31 @@ public class Window {
 	}
 	
 	public void preUpdate() {
-		Renderer.beginFrame();
+		
+	}
+	
+	public void nextLayer() {
+		
+	}
+	
+	public Int2 getViewport() {
+		return new Int2(canvas.getWidth(), canvas.getHeight());
+	}
+	
+	public void renderToCanvas() {
+		Graphics g = getGraphics();
+		Renderer.drawFrame(g);
+		g.dispose();
+	}
+	
+	public Graphics getGraphics() {
+		Graphics gg = bufferStrategy.getDrawGraphics();
+		return gg.create();
 	}
 	
 	public void postUpdate() {
-		Renderer.endFrame();
+		renderToCanvas();
 		
-		bufferStrategy.show();
-		Graphics gg = bufferStrategy.getDrawGraphics();
-		
-		Renderer.drawFrame(gg);
-		
-		gg.dispose();
 		bufferStrategy.show();
 	}
 	

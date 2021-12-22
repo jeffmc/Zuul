@@ -1,4 +1,4 @@
-package zuul.scene;
+package mcmillan.engine.scene;
 
 import java.awt.Color;
 

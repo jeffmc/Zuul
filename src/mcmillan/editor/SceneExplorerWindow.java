@@ -13,15 +13,14 @@ import javax.swing.JScrollPane;
 import javax.swing.JTree;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
-import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreeSelectionModel;
 
 import mcmillan.engine.ecs.Component;
-import zuul.scene.Entity;
-import zuul.scene.Scene;
-import zuul.scene.TagComponent;
+import mcmillan.engine.scene.Entity;
+import mcmillan.engine.scene.Scene;
+import mcmillan.engine.scene.TagComponent;
 
 public class SceneExplorerWindow {
 	private static final String TITLE = "Scene Viewer";

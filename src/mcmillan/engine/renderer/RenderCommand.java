@@ -1,15 +1,21 @@
 package mcmillan.engine.renderer;
 
 import java.awt.Color;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.Rectangle;
+import java.awt.font.LineMetrics;
+import java.awt.geom.Rectangle2D;
+import java.awt.image.ImageObserver;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import mcmillan.engine.math.Int2;
 import mcmillan.engine.math.IntTransform;
-import zuul.scene.BoxRendererComponent;
-import zuul.scene.LineRendererComponent;
-import zuul.scene.TransformComponent;
+import mcmillan.engine.scene.BoxRendererComponent;
+import mcmillan.engine.scene.LineRendererComponent;
+import mcmillan.engine.scene.TransformComponent;
 
 public class RenderCommand {
 	
@@ -67,20 +73,8 @@ public class RenderCommand {
 			throw new IllegalArgumentException(e);
 		}
 	}
-
-	public static RenderCommand drawString(String s, Int2 p) {
-		try {
-			Method m = gfxcls.getMethod("drawString", String.class, int.class, int.class);
-			// Store current value of passed string.
-			return new RenderCommand(m, s, p.x, p.y); 
-		} catch (NoSuchMethodException | SecurityException e) {
-			throw new IllegalArgumentException(e);
-		}
-	}
-	public static RenderCommand drawString(Color c, String s, Int2 p) {
-		return new RenderCommand(RenderCommand.setColor(c), RenderCommand.drawString(s, p));
-	}
 	
+	// Rect
 	public static RenderCommand fillRect(IntTransform t) {
 		try {
 			Method m = gfxcls.getMethod("fillRect", int.class, int.class, int.class, int.class);
@@ -108,33 +102,26 @@ public class RenderCommand {
 	public static RenderCommand drawRect(Color c, IntTransform t) {
 		return new RenderCommand(RenderCommand.setColor(c), RenderCommand.drawRect(t));
 	}
-	
-	public static RenderCommand centerAt(Int2 center, Int2 viewport) {
+
+	// Translation
+	public static RenderCommand translate(int x, int y) {
 		try {
 			Method m = gfxcls.getMethod("translate", int.class, int.class);
-			return new RenderCommand(m,
+			return new RenderCommand(m, x, y);
+		} catch (NoSuchMethodException | SecurityException e) {
+			throw new IllegalArgumentException(e);
+		}
+	}
+	public static RenderCommand translate(Int2 translation) {
+		return RenderCommand.translate(translation.x, translation.y);
+	}
+	public static RenderCommand centerAt(Int2 center, Int2 viewport) {
+		return RenderCommand.translate(
 					-center.x+viewport.x/2,
 					-center.y+viewport.y/2);
-		} catch (NoSuchMethodException | SecurityException e) {
-			throw new IllegalArgumentException(e);
-		}
-	}
-
-	public static RenderCommand drawLine(Int2 a, Int2 b) {
-		try {
-			Method m = gfxcls.getMethod("drawLine", int.class, int.class, int.class, int.class);
-			return new RenderCommand(m,
-					a.x,a.y,b.x,b.y);
-		} catch (NoSuchMethodException | SecurityException e) {
-			throw new IllegalArgumentException(e);
-		}
-	}
-	public static RenderCommand drawLine(Color c, Int2 a, Int2 b) {
-		return new RenderCommand(RenderCommand.setColor(c), RenderCommand.drawLine(a, b));
 	}
 	
-	// TODO: Line and text render commands (TextAnchor modes?)
-	
+	// Box
 	public static RenderCommand box(TransformComponent tc, BoxRendererComponent brc) {
 		Material m = brc.material;
 		IntTransform t = defineByUpperLeft(tc.transform);
@@ -159,7 +146,6 @@ public class RenderCommand {
 			return new RenderCommand();
 		}
 	}
-	
 	public static RenderCommand drawBox(IntTransform ot) {
 		IntTransform t = defineByUpperLeft(ot);
 		return RenderCommand.drawRect(new IntTransform(t.position, t.scale));
@@ -175,19 +161,117 @@ public class RenderCommand {
 	public static RenderCommand fillBox(Color c, IntTransform t) {
 		return new RenderCommand(RenderCommand.setColor(c), RenderCommand.fillBox(t)); 
 	}
-	
-	
 	public static IntTransform defineByUpperLeft(IntTransform transform) {
 		IntTransform t = new IntTransform(transform); // New transform defined by upper-left coordinate for drawing
 		t.position.sub(Int2.div(t.scale, 2));
 		return t;
 	}
 	
+	// Line
+	public static RenderCommand drawLine(Int2 a, Int2 b) {
+		try {
+			Method m = gfxcls.getMethod("drawLine", int.class, int.class, int.class, int.class);
+			return new RenderCommand(m,
+					a.x,a.y,b.x,b.y);
+		} catch (NoSuchMethodException | SecurityException e) {
+			throw new IllegalArgumentException(e);
+		}
+	}
+	public static RenderCommand drawLine(Color c, Int2 a, Int2 b) {
+		return new RenderCommand(RenderCommand.setColor(c), RenderCommand.drawLine(a, b));
+	}
 	public static RenderCommand line(LineRendererComponent lrc) {
 		return new RenderCommand(
 			RenderCommand.setColor(lrc.color), 
 			RenderCommand.drawLine(lrc.a,lrc.b)
 		);
 	}
+
+	// Text
+	public static RenderCommand drawString(String s, Int2 p) {
+		try {
+			Method m = gfxcls.getMethod("drawString", String.class, int.class, int.class);
+			// Store current value of passed string.
+			return new RenderCommand(m, s, p.x, p.y); 
+		} catch (NoSuchMethodException | SecurityException e) {
+			throw new IllegalArgumentException(e);
+		}
+	}
+	public static RenderCommand drawString(Color c, String s, Int2 p) {
+		return new RenderCommand(RenderCommand.setColor(c), RenderCommand.drawString(s, p));
+	}
 	
+	public static RenderCommand text(String txt, Int2 pos, TextAnchor horizAnchor, TextAnchor vertAnchor) {
+		Int2 offset = textBaselineOffset(txt, horizAnchor, vertAnchor);
+		return RenderCommand.drawString(txt, Int2.add(pos, offset));
+	}
+	public static RenderCommand text(Color c, String txt, Int2 pos, TextAnchor horizAnchor, TextAnchor vertAnchor) {
+		return new RenderCommand(
+				RenderCommand.setColor(c),
+				RenderCommand.text(txt, pos, horizAnchor, vertAnchor));
+	}
+	public static RenderCommand textBounding(String txt, Int2 pos, TextAnchor horizAnchor, TextAnchor vertAnchor) {
+		FontMetrics fm = Renderer.getFontMetrics();
+		Rectangle bounds = fm.getStringBounds(txt, null).getBounds();
+		Int2 offset = textBaselineOffset(txt, horizAnchor, vertAnchor);
+
+		IntTransform rect = new IntTransform(bounds.x, bounds.y, bounds.width, bounds.height);
+		rect.position.add(pos).add(offset);
+		return drawRect(rect);
+	}
+	public static RenderCommand textBounding(Color c, String txt, Int2 pos, TextAnchor horizAnchor, TextAnchor vertAnchor) {
+		return new RenderCommand(
+				RenderCommand.setColor(c),
+				RenderCommand.textBounding(txt, pos, horizAnchor, vertAnchor));
+	}
+	public static Int2 textBaselineOffset(String txt, TextAnchor horizAnchor, TextAnchor vertAnchor) {
+		FontMetrics fm = Renderer.getFontMetrics();
+		Int2 offset = new Int2();
+		Rectangle bounds = fm.getStringBounds(txt, null).getBounds();
+		LineMetrics lm = fm.getLineMetrics(txt, null);
+		switch (horizAnchor) {
+		case LEFT:
+			offset.x = 0;
+			break;
+		case RIGHT:
+			offset.x = -bounds.width;
+			break;
+		case CENTER: 
+			offset.x = -bounds.width/2;
+			break;
+		case BASELINE:
+		case TOP:
+		case BOTTOM:
+		default:
+			throw new IllegalArgumentException(horizAnchor.name() + " not a valid horizontal text anchor!");
+		}
+		switch (vertAnchor) {
+		case BASELINE:
+			offset.y = 0;
+			break;
+		case TOP:
+			offset.y = (int)lm.getAscent();
+			break;
+		case BOTTOM: 
+			offset.y = (int)-lm.getDescent();
+			break;
+		case CENTER: 
+			offset.y = (int)(lm.getHeight()/2-lm.getDescent());
+			break;
+		case LEFT:
+		case RIGHT:
+		default:
+			throw new IllegalArgumentException(vertAnchor.name() + " not a valid vertical text anchor!");
+		}
+		return offset;
+	}
+	public static RenderCommand image(Int2 pos, Image image) {
+		try {
+			Method m = gfxcls.getMethod("drawImage", Image.class, int.class, int.class, ImageObserver.class);
+			return new RenderCommand(m,
+					image, pos.x, pos.y, null);
+		} catch (NoSuchMethodException | SecurityException e) {
+			throw new IllegalArgumentException(e);
+		}
+	}
 }

@@ -148,12 +148,15 @@ public final class ECSRegistry {
 			
 			results = new HashMap<>();
 			
-			for (Component c : componentMap.get(componentTypes[0])) {
-				long e = c.getEntity();
-				Component[] cArr = new Component[componentTypes.length];
-				cArr[0] = c;
-				results.put(e, cArr);
-			};
+			HashSet<Component> cSet = componentMap.get(componentTypes[0]);
+			if (cSet != null) {
+				for (Component c : cSet) {
+					long e = c.getEntity();
+					Component[] cArr = new Component[componentTypes.length];
+					cArr[0] = c;
+					results.put(e, cArr);
+				}
+			}
 			Set<Long> toRemove = new TreeSet<>();
 			for (int i=1;i<componentTypes.length;i++) {
 				final int x = i; // For anonymous predicate implementation

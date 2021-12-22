@@ -1,7 +1,6 @@
-package zuul.scene;
+package mcmillan.engine.scene;
 
 import java.awt.Color;
-import java.util.Random;
 
 import mcmillan.engine.ecs.Component;
 import mcmillan.engine.ecs.ECSRegistry;
@@ -10,9 +9,6 @@ import mcmillan.engine.math.IntTransform;
 import mcmillan.engine.renderer.Material;
 import mcmillan.engine.renderer.RenderCommand;
 import mcmillan.engine.renderer.Renderer;
-import zuul.world.Level;
-import zuul.world.Path;
-import zuul.world.Room;
 
 public class Scene {
 
@@ -84,26 +80,6 @@ public class Scene {
 		}
 	}
 	
-	public static Scene levelToScene(Level in) {
-		Material regularMat = Material.stroke(Color.white), spawnMat = Material.stroke(Color.pink);
-		Scene scene = new Scene(in.getName());
-		for (Room r : in.getRooms()) {
-			Entity e = scene.newEntity("Room " + r.getName(), r.getTransform());
-			scene.ecs.addComponent(BoxRendererComponent.class, e.ecsID(), r.isSpawnpoint() ? spawnMat : regularMat);
-		}
-		System.out.println("Path Count: "+in.getPaths().size());
-		for (Path p : in.getPaths()) {
-			// TODO: Add paths
-			Random r = new Random();
-			Entity e = scene.newEntity("Path: " + p.getA().getName() + " - "+ p.getB().getName());
-			int v = r.nextInt(256);
-			scene.ecs.addComponent(LineRendererComponent.class, e.ecsID(), 
-					new Color(v, 255-v, 128+v/2), 
-					p.getA().getPosition(), p.getB().getPosition());
-		}
-		return scene;
-	}
-
 	public Entity selectEntityAt(Int2 worldCoords) {
 		return null; // TODO: Write selection algorithm
 	}

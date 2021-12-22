@@ -19,8 +19,8 @@ import javax.swing.JTextField;
 import javax.swing.SpringLayout;
 
 import mcmillan.engine.ecs.Component;
-import zuul.scene.Entity;
-import zuul.scene.TagComponent;
+import mcmillan.engine.scene.Entity;
+import mcmillan.engine.scene.TagComponent;
 
 public class EntityInspectorWindow {
 

@@ -1,28 +1,7 @@
 package zuul.util;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.Map.Entry;
-
-import com.amihaiemil.eoyaml.Yaml;
-import com.amihaiemil.eoyaml.YamlInput;
-import com.amihaiemil.eoyaml.YamlMapping;
-import com.amihaiemil.eoyaml.YamlMappingBuilder;
-import com.amihaiemil.eoyaml.YamlNode;
-import com.amihaiemil.eoyaml.YamlPrinter;
-import com.amihaiemil.eoyaml.YamlSequence;
-import com.amihaiemil.eoyaml.YamlSequenceBuilder;
-
-import mcmillan.engine.math.IntTransform;
-import zuul.world.Level;
-import zuul.world.OneWayPath;
-import zuul.world.Path;
-import zuul.world.Room;
-import zuul.world.TwoWayPath;
-
 public class LevelManager {
-
+/*
 	// TODO: Add CSV color scalar, similar to Int2 and IntTransform
 	
 	// https://github.com/decorators-squad/eo-yaml/wiki/Block-Style-YAML
@@ -162,5 +141,5 @@ public class LevelManager {
 			System.err.println("Error reading level file: " + f.getAbsolutePath());
 		}
 		return null;
-    }
+    }*/
 }

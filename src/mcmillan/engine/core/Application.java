@@ -2,7 +2,7 @@ package mcmillan.engine.core;
 
 import java.util.Iterator;
 
-import mcmillan.engine.renderer.Renderer;
+import mcmillan.engine.zui.ZUILayer;
 
 public abstract class Application {
 
@@ -24,6 +24,8 @@ public abstract class Application {
 	private String name;
 	public String getName() { return name; }
 
+	public ZUILayer zuiLayer;
+	
 	private long lastTime = System.nanoTime();
 	
 	public Application(String name, String[] args) {
@@ -32,6 +34,10 @@ public abstract class Application {
 		this.name = name.isBlank() ? "ZEngine App" : name;
 		cmdLineArgs = args;
 		cmdLineArgCount = cmdLineArgs.length;
+		
+		zuiLayer = new ZUILayer();
+		
+		pushOverlay(zuiLayer);
 	}
 	
 //	public void onEvent(Event e) { }
@@ -60,19 +66,19 @@ public abstract class Application {
 					lastTime = System.nanoTime();
 					Timestep ts = new Timestep(delta);
 					
-					window.preUpdate();
-					
 					Iterator<Layer> layers = layerStack.ascendingIterator();
 					while (layers.hasNext()) {
 						Layer layer = layers.next();
 						layer.onUpdate(ts);
 					}
-					
+
+					zuiLayer.begin();
 					layers = layerStack.ascendingIterator();
 					while (layers.hasNext()) {
 						Layer layer = layers.next();
 						layer.OnZUIRender(ts);
 					}
+					zuiLayer.end();
 					
 					window.postUpdate();
 				}

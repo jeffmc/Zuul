@@ -1,50 +1,23 @@
 package mcmillan.editor;
 
-import java.awt.Canvas;
 import java.awt.CheckboxMenuItem;
 import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Menu;
 import java.awt.MenuBar;
-import java.awt.MenuItem;
-import java.awt.MenuShortcut;
-import java.awt.Point;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.awt.image.BufferStrategy;
-import java.io.File;
-
-import javax.swing.JColorChooser;
-import javax.swing.JFrame;
 
 import mcmillan.engine.core.Application;
 import mcmillan.engine.core.Layer;
 import mcmillan.engine.core.Timestep;
 import mcmillan.engine.math.Int2;
 import mcmillan.engine.math.IntTransform;
+import mcmillan.engine.renderer.Framebuffer;
 import mcmillan.engine.renderer.RenderCommand;
 import mcmillan.engine.renderer.Renderer;
+import mcmillan.engine.scene.BoxRendererComponent;
+import mcmillan.engine.scene.Entity;
+import mcmillan.engine.scene.LineRendererComponent;
+import mcmillan.engine.scene.Scene;
+import mcmillan.engine.scene.TransformComponent;
 import mcmillan.engine.zui.ZUI;
-import zuul.Game;
-import zuul.scene.BoxRendererComponent;
-import zuul.scene.Entity;
-import zuul.scene.LineRendererComponent;
-import zuul.scene.Scene;
-import zuul.scene.TransformComponent;
-import zuul.util.LevelManager;
-import zuul.world.Level;
-import zuul.world.Room;
 
 public class EditorLayer extends Layer {
 	
@@ -53,7 +26,6 @@ public class EditorLayer extends Layer {
 
 	private Int2 camera, startCamera;
 	
-	private Room movingRoom;
 	private Int2 startRoom;
 	
 	private MenuBar menuBar;
@@ -61,8 +33,10 @@ public class EditorLayer extends Layer {
 	private Color backgroundColor = new Color(20,20,20);
 	private Color highlightColor = new Color(235,235,20);
 	
+	private Framebuffer fb;
+	
 	private SceneExplorerWindow sceneExplorer = null;
-	private boolean sceneExplorerEnabled = true;
+	private boolean sceneExplorerEnabled = false;
 	private CheckboxMenuItem sceneExplorerBtn = new CheckboxMenuItem("Scene Explorer", sceneExplorerEnabled);
 	public void disposedSceneExplorer() {
 		sceneExplorer = null;
@@ -76,7 +50,7 @@ public class EditorLayer extends Layer {
 	}
 	
 	private EntityInspectorWindow entityInspector = null;
-	private boolean entityInspectorEnabled = true;
+	private boolean entityInspectorEnabled = false;
 	private CheckboxMenuItem entityInspectorBtn = new CheckboxMenuItem("Entity Inspector", sceneExplorerEnabled);
 	public void disposedEntityInspector() { 
 		entityInspector = null;
@@ -91,26 +65,6 @@ public class EditorLayer extends Layer {
 	
 	public EditorLayer() {
 		super("EditorLayer");
-		Scene loadedScene = null;
-		{
-			Level level = LevelManager.load(new File("GenesisReadOnly.yaml"));
-			LevelManager.save(level);
-			
-			loadedScene = Scene.levelToScene(level);
-			
-			if (level != null) {
-				// Start cmd line game in own thread
-				Game instance = new Game(level);
-				new Thread(() -> instance.play()).start();
-			}
-		}
-//		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // TODO: Implement for awt Frame
-		
-		camera = new Int2();
-		startCamera = new Int2();
-		setActiveScene(loadedScene);
-		
-		setupEditorWindows();
 	}
 	
 	private void setupEditorWindows() {
@@ -118,7 +72,7 @@ public class EditorLayer extends Layer {
 		if (entityInspectorEnabled) makeEntityInspector();
 	}
 	
-	private void setupMenubar() {
+	/*private void setupMenubar() {
 		menuBar = new MenuBar();
 		JFrame frame = Application.instance().window().getFrame();
 		frame.setMenuBar(menuBar);
@@ -182,13 +136,20 @@ public class EditorLayer extends Layer {
 			}});
 			viewMenu.add(entityInspectorBtn);
 		}
-	}
+	}*/
 	
 
 	@Override
 	public void onAttach() {
+		Scene loadedScene = null;
+		fb = new Framebuffer(Renderer.viewport());
 		
-		// Get bufferStrat
+		camera = new Int2();
+		startCamera = new Int2();
+		setActiveScene(loadedScene);
+		
+		setupEditorWindows();
+		
 	}
 
 	@Override
@@ -199,7 +160,11 @@ public class EditorLayer extends Layer {
 
 	@Override
 	public void onUpdate(Timestep ts) {
-		Int2 viewport = Renderer.viewport();
+		Int2 viewport = new Int2(128,128);
+		fb.size.set(viewport);
+		
+		Renderer.beginFrame(fb.size);
+		
 		Renderer.submit(RenderCommand.fillRect(backgroundColor, new IntTransform(new Int2(), viewport)));
 		activeScene.render(viewport, camera);
 		
@@ -214,13 +179,19 @@ public class EditorLayer extends Layer {
 				Renderer.submit(RenderCommand.drawBox(highlightColor, boxOffset(tc.transform, 5)));
 			}
 		}
+		
+		Renderer.endFrame();
+		
+		Renderer.drawFrame(fb.getImage().createGraphics());
 	}
 
 	@Override
 	public void OnZUIRender(Timestep ts) {
-		ZUI.beginFrame("Test");
-		ZUI.endFrame();
+		ZUI.begin("First Window");
 		
+		Renderer.submit(RenderCommand.image(new Int2(0,0), fb.getImage()));
+		
+		ZUI.end();
 	}
 	
 	private Int2 canvasCoordsToWorldCoords(Int2 canvasCoords) {
@@ -239,14 +210,11 @@ public class EditorLayer extends Layer {
 	}
 	
 	public void setActiveScene(Scene scene) {
-		if (scene != null) {
-			activeScene = scene;
-		} else {
-			activeScene = new Scene("Untitled Scene");
-		}
+		activeScene = scene != null ? scene : new Scene("Untitled Scene");
+		
 		Application.instance().window().setTitle("Zuul Editor - " + activeScene.getLabel());
 		camera.set(0,0);
-		if (sceneExplorer != null && activeScene != null)
+		if (sceneExplorer != null)
 			sceneExplorer.setActiveScene(activeScene);
 	}
 	
@@ -260,7 +228,6 @@ public class EditorLayer extends Layer {
 	private static IntTransform boxSurrounding(Int2 a, Int2 b) {
 		return boxSurrounding(a,b,0);
 	}
-	
 	private static IntTransform boxOffset(IntTransform in, int offset) {
 		IntTransform val = new IntTransform(in);
 		val.scale.add(offset, offset);
