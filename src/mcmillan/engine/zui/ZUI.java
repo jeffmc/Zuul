@@ -1,6 +1,7 @@
 package mcmillan.engine.zui;
 
 import java.awt.Color;
+import java.awt.Image;
 
 import mcmillan.engine.math.Int2;
 import mcmillan.engine.math.IntTransform;
@@ -24,25 +25,29 @@ public abstract class ZUI {
 	private static final Color ALERT = new Color(205,50,50);
 	private static final Color DEBUG = new Color(50,50,205);
 	
+	public static int frames = 0;
+	
 	public static void begin(String title) {
 		currentTitle = title;
 		cursor = new Int2(Renderer.getFontMetrics().getHeight() + MARGIN*2, MARGIN);
+		frames++;
 	}
 
 	public static void end() {
-		IntTransform frameBounds = new IntTransform(10, 10, 300, 650);
+		IntTransform frameBounds = new IntTransform(276, 10, 200, 200 + frames % 100);
 		Renderer.submit(RenderCommand.fillRect(FRAME_BACKGROUND, frameBounds));
 		Renderer.submit(RenderCommand.drawRect(FRAME_BORDER, frameBounds));
-		Renderer.submit(RenderCommand.translate(frameBounds.position));
+		Renderer.submit(RenderCommand.pushClipRect(frameBounds));
+		Renderer.submit(RenderCommand.pushTranslation(frameBounds.position));
 		IntTransform title = new IntTransform(MARGIN, MARGIN, 
 				frameBounds.scale.x-MARGIN*2, 24);
 //		Renderer.submit(RenderCommand.drawRect(DEBUG, title));
 		Renderer.submit(RenderCommand.text(FOREGROUND_PRIMARY, currentTitle, title.position, TextAnchor.LEFT, TextAnchor.TOP));
 		
-		IntTransform resizer = new IntTransform(0, 0, 10, 10);
-		resizer.position.set(frameBounds.scale.x-THIN_MARGIN-resizer.scale.x, 
-				frameBounds.scale.y-THIN_MARGIN-resizer.scale.y);
-		Renderer.submit(RenderCommand.fillRect(DEBUG, resizer));
+		IntTransform resizeWidget = new IntTransform(0, 0, 10, 10);
+		resizeWidget.position.set(frameBounds.scale.x-THIN_MARGIN-resizeWidget.scale.x, 
+				frameBounds.scale.y-THIN_MARGIN-resizeWidget.scale.y);
+		Renderer.submit(RenderCommand.fillRect(DEBUG, resizeWidget));
 		
 		String sample = "AaPpQq";
 		Int2 boxSz = new Int2(4,4);
@@ -55,5 +60,15 @@ public abstract class ZUI {
 				Renderer.submit(RenderCommand.drawBox(DEBUG, new IntTransform(txtPos, boxSz)));
 			}
 		}
+		Renderer.submit(RenderCommand.popClipRect());
+		Renderer.submit(RenderCommand.popTranslation());
+	}
+	
+	public static void image(Image image) {
+		Renderer.submit(RenderCommand.image(new Int2(10,10), image));
+	}
+	
+	public static void renderWindow(String title) {
+		
 	}
 }

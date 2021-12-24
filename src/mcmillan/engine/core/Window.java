@@ -100,6 +100,11 @@ public class Window {
 		canvas.setPreferredSize(size);
 		canvas.setMaximumSize(size);
 	}
+
+	public void close() {
+		frame.setVisible(false);
+		frame.dispose();
+	}
 	
 //	private void setupDragging() {
 //		dragType = null;

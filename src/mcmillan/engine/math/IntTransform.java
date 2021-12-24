@@ -1,5 +1,6 @@
 package mcmillan.engine.math;
 
+import java.awt.Rectangle;
 import java.util.StringTokenizer;
 
 public class IntTransform {
@@ -25,6 +26,9 @@ public class IntTransform {
 	public IntTransform(IntTransform o) {
 		this();
 		this.set(o);
+	}
+	public IntTransform(Rectangle r) {
+		this(r.x, r.y, r.width, r.height);
 	}
 	public void set(int x, int y, int w, int h) {
 		position.set(x, y);

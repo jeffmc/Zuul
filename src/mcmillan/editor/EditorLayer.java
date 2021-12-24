@@ -7,6 +7,7 @@ import java.awt.MenuBar;
 import mcmillan.engine.core.Application;
 import mcmillan.engine.core.Layer;
 import mcmillan.engine.core.Timestep;
+import mcmillan.engine.debug.Profiler;
 import mcmillan.engine.math.Int2;
 import mcmillan.engine.math.IntTransform;
 import mcmillan.engine.renderer.Framebuffer;
@@ -160,13 +161,40 @@ public class EditorLayer extends Layer {
 
 	@Override
 	public void onUpdate(Timestep ts) {
-		Int2 viewport = new Int2(128,128);
+		Profiler.Scope scope = Profiler.startScope();
+		
+		Int2 viewport = new Int2(256,256);
 		fb.size.set(viewport);
 		
 		Renderer.beginFrame(fb.size);
 		
-		Renderer.submit(RenderCommand.fillRect(backgroundColor, new IntTransform(new Int2(), viewport)));
-		activeScene.render(viewport, camera);
+		Renderer.submit(RenderCommand.background(backgroundColor));
+		
+		activeScene.render(camera);
+		
+		renderOverlay();
+		
+		Renderer.endFrame();
+		
+		Renderer.drawFrame(fb.getImage().createGraphics());
+	
+		scope.stop();
+	}
+
+	@Override
+	public void finalize() {
+		System.out.println("EditorLayer finalized!");
+	}
+	
+	public void renderOverlay() {
+		Int2 viewport = Renderer.viewport();
+		Renderer.submit(RenderCommand.setColor(Color.WHITE));
+		Renderer.submit(RenderCommand.drawString("Viewport: " + viewport.toString() + ", Camera: " + camera.toString(), new Int2(5, viewport.y-5))); // Draw camera position in bottom-left corner.
+		
+		// Draw 4x4 white rect at center of board, mostly for debugging
+		Renderer.submit(RenderCommand.setColor(Color.WHITE));
+		Renderer.submit(RenderCommand.fillRect(
+				new IntTransform(viewport.x/2-2, viewport.y/2-2, 4, 4)));
 		
 		if (selectedEntity != null) {
 			TransformComponent tc = selectedEntity.getComponent(TransformComponent.class);
@@ -179,19 +207,19 @@ public class EditorLayer extends Layer {
 				Renderer.submit(RenderCommand.drawBox(highlightColor, boxOffset(tc.transform, 5)));
 			}
 		}
-		
-		Renderer.endFrame();
-		
-		Renderer.drawFrame(fb.getImage().createGraphics());
 	}
-
+	
 	@Override
-	public void OnZUIRender(Timestep ts) {
+	public void onZUIRender(Timestep ts) {
+		Profiler.Scope scope = Profiler.startScope();
+		
 		ZUI.begin("First Window");
 		
-		Renderer.submit(RenderCommand.image(new Int2(0,0), fb.getImage()));
+		ZUI.image(fb.getImage());
 		
 		ZUI.end();
+		
+		scope.stop();
 	}
 	
 	private Int2 canvasCoordsToWorldCoords(Int2 canvasCoords) {

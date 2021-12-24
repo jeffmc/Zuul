@@ -98,6 +98,12 @@ public class Int2 {
 	public static Int2 div(Int2 a, int d) {
 		return new Int2(a.x / d, a.y / d);
 	}
+
+	public Int2 negative() {
+		this.x = -this.x;
+		this.y = -this.y;
+		return this;
+	}
 	
 	@Override
 	public String toString() {

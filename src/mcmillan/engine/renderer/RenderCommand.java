@@ -6,10 +6,6 @@ import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.font.LineMetrics;
-import java.awt.geom.Rectangle2D;
-import java.awt.image.ImageObserver;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 
 import mcmillan.engine.math.Int2;
 import mcmillan.engine.math.IntTransform;
@@ -17,108 +13,61 @@ import mcmillan.engine.scene.BoxRendererComponent;
 import mcmillan.engine.scene.LineRendererComponent;
 import mcmillan.engine.scene.TransformComponent;
 
-public class RenderCommand {
+public class RenderCommand implements Renderable {
 	
 	public static Class<Graphics> gfxcls = Graphics.class;
 	
-	private int length;
-	private Method[] methods;
-	private Object[][] args;
-
-	private RenderCommand(Method[] ms, Object[][] args) {
-		this.methods = ms;
-		this.args = args;
-		if (args.length != methods.length) throw new IllegalArgumentException("Argument array length not equal to method array length!");
-		length = methods.length;
-	}
-	private RenderCommand(Method m, Object... args) {
-		this(new Method[] {m}, new Object[][] {args});
-	}
-	private RenderCommand() {
-		this(new Method[0], new Object[0][]);
-	}
-	private RenderCommand(RenderCommand... cmds) {
-		int totalLength = 0;
-		for (RenderCommand c : cmds) totalLength += c.length;
-		this.methods = new Method[totalLength];
-		this.args = new Object[totalLength][];
-		int l = 0;
-		for (RenderCommand cmd : cmds) {
-			for (int i=0;i<cmd.length;i++) {
-				if (l >= totalLength) throw new ArrayIndexOutOfBoundsException("Iterated past full length!");
-				this.methods[l] = cmd.methods[i];
-				this.args[l] = cmd.args[i];
-				l++;
-			}
-		}
-		if (l != totalLength) throw new IllegalStateException("Did not iterate to full length!");
-		this.length = totalLength;
+	private Renderable[] cmds;
+	public int getLength() { return cmds != null ? cmds.length : 0; }
+	
+	public RenderCommand(Renderable...cmds) {
+		this.cmds = cmds;
 	}
 	
-	public void fire(Graphics g) {
-		try {
-			for (int i=0;i<length;i++)
-				methods[i].invoke(g, args[i]);
-		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-			e.printStackTrace();
-		}
+	@Override
+	public void render(Graphics g) {
+		if (cmds != null)
+			for (Renderable r : cmds)
+				r.render(g);
 	}
 
-	public static RenderCommand setColor(Color c) {
-		try {
-			Method m = gfxcls.getMethod("setColor", Color.class);
-			// Store current value of passed color. ( Even though I think Color is read-only once constructed. )
-			return new RenderCommand(m, new Color(c.getRGB(), true)); 
-		} catch (NoSuchMethodException | SecurityException e) {
-			throw new IllegalArgumentException(e);
-		}
+	public static Renderable setColor(Color c) {
+		return new Renderable() {
+			@Override
+			public void render(Graphics g) {
+				g.setColor(c);
+			}
+		};
 	}
 	
 	// Rect
-	public static RenderCommand fillRect(IntTransform t) {
-		try {
-			Method m = gfxcls.getMethod("fillRect", int.class, int.class, int.class, int.class);
-			return new RenderCommand(m,
-					t.position.x,t.position.y,
-					t.scale.x,t.scale.y);
-		} catch (NoSuchMethodException | SecurityException e) {
-			throw new IllegalArgumentException(e);
-		}
+	public static Renderable fillRect(IntTransform t) {
+		return new Renderable() {
+			@Override
+			public void render(Graphics g) {
+				g.fillRect(t.position.x,t.position.y,
+									t.scale.x,t.scale.y);
+			}
+		};
 	}
 	public static RenderCommand fillRect(Color c, IntTransform t) {
 		return new RenderCommand(RenderCommand.setColor(c), RenderCommand.fillRect(t));
 	}
+	public static RenderCommand background(Color c) {
+		return fillRect(c, new IntTransform(new Int2(), Renderer.viewport()));
+	}
 	
-	public static RenderCommand drawRect(IntTransform t) {
-		try {
-			Method m = gfxcls.getMethod("drawRect", int.class, int.class, int.class, int.class);
-			return new RenderCommand(m,
-					t.position.x,t.position.y,
-					t.scale.x,t.scale.y);
-		} catch (NoSuchMethodException | SecurityException e) {
-			throw new IllegalArgumentException(e);
-		}
+	public static Renderable drawRect(IntTransform t) {
+		return new Renderable() {
+			@Override
+			public void render(Graphics g) {
+				g.drawRect(t.position.x,t.position.y,
+						t.scale.x,t.scale.y);
+			}
+		};
 	}
 	public static RenderCommand drawRect(Color c, IntTransform t) {
 		return new RenderCommand(RenderCommand.setColor(c), RenderCommand.drawRect(t));
-	}
-
-	// Translation
-	public static RenderCommand translate(int x, int y) {
-		try {
-			Method m = gfxcls.getMethod("translate", int.class, int.class);
-			return new RenderCommand(m, x, y);
-		} catch (NoSuchMethodException | SecurityException e) {
-			throw new IllegalArgumentException(e);
-		}
-	}
-	public static RenderCommand translate(Int2 translation) {
-		return RenderCommand.translate(translation.x, translation.y);
-	}
-	public static RenderCommand centerAt(Int2 center, Int2 viewport) {
-		return RenderCommand.translate(
-					-center.x+viewport.x/2,
-					-center.y+viewport.y/2);
 	}
 	
 	// Box
@@ -146,7 +95,7 @@ public class RenderCommand {
 			return new RenderCommand();
 		}
 	}
-	public static RenderCommand drawBox(IntTransform ot) {
+	public static Renderable drawBox(IntTransform ot) {
 		IntTransform t = defineByUpperLeft(ot);
 		return RenderCommand.drawRect(new IntTransform(t.position, t.scale));
 	}
@@ -154,7 +103,7 @@ public class RenderCommand {
 		return new RenderCommand(RenderCommand.setColor(c), RenderCommand.drawBox(t)); 
 	}
 	
-	public static RenderCommand fillBox(IntTransform ot) {
+	public static Renderable fillBox(IntTransform ot) {
 		IntTransform t = defineByUpperLeft(ot);
 		return RenderCommand.fillRect(new IntTransform(t.position, t.scale));
 	}
@@ -168,14 +117,13 @@ public class RenderCommand {
 	}
 	
 	// Line
-	public static RenderCommand drawLine(Int2 a, Int2 b) {
-		try {
-			Method m = gfxcls.getMethod("drawLine", int.class, int.class, int.class, int.class);
-			return new RenderCommand(m,
-					a.x,a.y,b.x,b.y);
-		} catch (NoSuchMethodException | SecurityException e) {
-			throw new IllegalArgumentException(e);
-		}
+	public static Renderable drawLine(Int2 a, Int2 b) {
+		return new Renderable() {
+			@Override
+			public void render(Graphics g) {
+				g.drawLine(a.x, a.y, b.x, b.y);
+			}
+		};
 	}
 	public static RenderCommand drawLine(Color c, Int2 a, Int2 b) {
 		return new RenderCommand(RenderCommand.setColor(c), RenderCommand.drawLine(a, b));
@@ -188,20 +136,19 @@ public class RenderCommand {
 	}
 
 	// Text
-	public static RenderCommand drawString(String s, Int2 p) {
-		try {
-			Method m = gfxcls.getMethod("drawString", String.class, int.class, int.class);
-			// Store current value of passed string.
-			return new RenderCommand(m, s, p.x, p.y); 
-		} catch (NoSuchMethodException | SecurityException e) {
-			throw new IllegalArgumentException(e);
-		}
+	public static Renderable drawString(String s, Int2 p) {
+		return new Renderable() {
+			@Override
+			public void render(Graphics g) {
+				g.drawString(s, p.x, p.y);
+			}
+		};
 	}
 	public static RenderCommand drawString(Color c, String s, Int2 p) {
 		return new RenderCommand(RenderCommand.setColor(c), RenderCommand.drawString(s, p));
 	}
 	
-	public static RenderCommand text(String txt, Int2 pos, TextAnchor horizAnchor, TextAnchor vertAnchor) {
+	public static Renderable text(String txt, Int2 pos, TextAnchor horizAnchor, TextAnchor vertAnchor) {
 		Int2 offset = textBaselineOffset(txt, horizAnchor, vertAnchor);
 		return RenderCommand.drawString(txt, Int2.add(pos, offset));
 	}
@@ -210,7 +157,7 @@ public class RenderCommand {
 				RenderCommand.setColor(c),
 				RenderCommand.text(txt, pos, horizAnchor, vertAnchor));
 	}
-	public static RenderCommand textBounding(String txt, Int2 pos, TextAnchor horizAnchor, TextAnchor vertAnchor) {
+	public static Renderable textBounding(String txt, Int2 pos, TextAnchor horizAnchor, TextAnchor vertAnchor) {
 		FontMetrics fm = Renderer.getFontMetrics();
 		Rectangle bounds = fm.getStringBounds(txt, null).getBounds();
 		Int2 offset = textBaselineOffset(txt, horizAnchor, vertAnchor);
@@ -219,6 +166,7 @@ public class RenderCommand {
 		rect.position.add(pos).add(offset);
 		return drawRect(rect);
 	}
+	
 	public static RenderCommand textBounding(Color c, String txt, Int2 pos, TextAnchor horizAnchor, TextAnchor vertAnchor) {
 		return new RenderCommand(
 				RenderCommand.setColor(c),
@@ -265,13 +213,67 @@ public class RenderCommand {
 		}
 		return offset;
 	}
-	public static RenderCommand image(Int2 pos, Image image) {
-		try {
-			Method m = gfxcls.getMethod("drawImage", Image.class, int.class, int.class, ImageObserver.class);
-			return new RenderCommand(m,
-					image, pos.x, pos.y, null);
-		} catch (NoSuchMethodException | SecurityException e) {
-			throw new IllegalArgumentException(e);
-		}
+	
+	// Image
+	public static Renderable image(Int2 pos, Image image) {
+		return new Renderable() {
+			@Override
+			public void render(Graphics g) {
+				g.drawImage(image, pos.x, pos.y, null);
+			}
+		};
+	}
+
+	// Translation
+	@Deprecated
+	public static Renderable translate(int x, int y) {
+		return new Renderable() {
+			@Override
+			public void render(Graphics g) {
+				g.translate(x, y);
+			}
+		};
+	}
+	@Deprecated
+	public static Renderable translate(Int2 translation) {
+		return RenderCommand.translate(translation.x, translation.y);
+	}
+	public static Renderable pushTranslation(Int2 translation) {
+		return new Renderable() {
+			@Override
+			public void render(Graphics g) {
+				Renderer.pushTranslation(g, translation);
+			}
+		};
+	}
+	public static Renderable pushTranslation(int x, int y) {
+		return pushTranslation(new Int2(x,y));
+	}
+	public static Renderable popTranslation() {
+		return new Renderable() {
+			@Override
+			public void render(Graphics g) {
+				Renderer.popTranslation(g);
+			}
+		};
+	}
+	
+	// Clipping
+	public static Renderable pushClipRect(IntTransform clip) {
+		return new Renderable() {
+			@Override
+			public void render(Graphics g) {
+				Renderer.pushClipRect(g, clip);
+			}
+		};
+	}
+	
+	public static Renderable popClipRect() {
+		return new Renderable() {
+			@Override
+			public void render(Graphics g) {
+				Renderer.popClipRect(g);
+			}
+		};
 	}
 }

@@ -6,14 +6,19 @@ import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GraphicsEnvironment;
+import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.util.ArrayList;
 import java.util.List;
 
 import mcmillan.engine.core.Window;
 import mcmillan.engine.math.Int2;
+import mcmillan.engine.math.IntTransform;
 
 public abstract class Renderer {
+	
+	private static ArrayList<IntTransform> clipRectStack = new ArrayList<>();
+	private static ArrayList<Int2> translationStack = new ArrayList<>();
 	
 	private static Font defaultFont = new Font("Roboto", Font.PLAIN, 18); 
 	private static FontMetrics defaultFontMetrics = new Canvas().getFontMetrics(defaultFont);
@@ -22,7 +27,7 @@ public abstract class Renderer {
 
 	public static Int2 viewport() { return new Int2(viewportWidth, viewportHeight); }
 	
-	private static List<RenderCommand> renderCommands = new ArrayList<>();
+	private static List<Renderable> renderables = new ArrayList<>();
 	
 //	 TODO: ADD TEXT SUPPORT TO NEW RENDERER!
 	
@@ -33,11 +38,24 @@ public abstract class Renderer {
 		viewportWidth = viewport.x;
 		viewportHeight = viewport.y;
 		frameClosed = false;
-		if (renderCommands != null) {
-			renderCommands.clear();
+		
+		// Lists
+		if (clipRectStack != null) {
+			clipRectStack.clear();
 		} else {
-			renderCommands = new ArrayList<>();
+			clipRectStack = new ArrayList<>();
 		}
+		if (translationStack != null) {
+			translationStack.clear();
+		} else {
+			translationStack = new ArrayList<>();
+		}
+		if (renderables != null) {
+			renderables.clear();
+		} else {
+			renderables = new ArrayList<>();
+		}
+		submit(RenderCommand.pushClipRect(new IntTransform(0, 0, viewportWidth, viewportHeight)));
 	}
 	
 	public static void endFrame() {
@@ -55,14 +73,48 @@ public abstract class Renderer {
 			throw new IllegalArgumentException("Graphics object not an instance of Graphics2D");
 		}
 		
-		for (RenderCommand cmd : renderCommands)
-			cmd.fire(g);
+		for (Renderable cmd : renderables)
+			cmd.render(g);
 		g.dispose();
 	}
 	
 	// Submit a Graphics command
-	public static void submit(RenderCommand cmd) { if (!frameClosed) renderCommands.add(cmd); }
+	public static void submit(Renderable cmd) { if (!frameClosed) renderables.add(cmd); }
 
+	// Clipping
+	public static void pushClipRect(Graphics g, IntTransform clip) {
+		Rectangle bounds = g.getClipBounds();
+		clipRectStack.add(bounds != null ? new IntTransform(bounds) : new IntTransform(0, 0, viewportWidth, viewportHeight));
+		g.setClip(clip.position.x, clip.position.y, clip.scale.x, clip.scale.y);
+	}
+	
+	public static void popClipRect(Graphics g) {
+		int stackSize = clipRectStack.size();
+		if (stackSize > 0) {
+			IntTransform lastClip = clipRectStack.remove(clipRectStack.size()-1);
+			g.setClip(lastClip.position.x, lastClip.position.y, lastClip.scale.x, lastClip.scale.y);
+		} else {
+			System.err.println("No clips to pop left in Renderer.clipRectStack!");
+			g.setClip(0, 0, viewportWidth, viewportHeight);
+		}
+	}
+	
+	// Translation
+	public static void pushTranslation(Graphics g, Int2 translation) {
+		translationStack.add(new Int2(translation)); // Add a copy of the translation
+		g.translate(translation.x, translation.y);
+	}
+	
+	public static void popTranslation(Graphics g) {
+		int stackSize = translationStack.size();
+		if (stackSize > 0) {
+			Int2 translation = translationStack.remove(stackSize-1);
+			translation.negative();
+			g.translate(translation.x, translation.y);
+		} else {
+			System.err.println("No translations to pop left in Renderer.translationStack!");
+		}
+	}
 	
 	// Fonts
 	public static void setFontFromContext(Graphics g) {
@@ -83,22 +135,4 @@ public abstract class Renderer {
 	public static void setViewport(int width, int height) { viewportWidth = width; viewportHeight = height; }
 	public static int viewportWidth() { return viewportWidth; }
 	public static int viewportHeight() { return viewportHeight; }
-	
-	// Weird debugger methods
-	public static String absoluteTrace(int stackTraceOffset) { 
-		return methodName(1+stackTraceOffset) + "(" + fileName(1+stackTraceOffset) + ":" + lineNumber(1+stackTraceOffset) + ")"; }
-	public static String absoluteTrace() { return absoluteTrace(1); }
-	
-	public static String fileName(int stackTraceOffset) {
-		return Thread.currentThread().getStackTrace()[2+stackTraceOffset].getFileName(); }
-	public static String fileName() { return fileName(1); }
-	
-	public static String methodName(int stackTraceOffset) { 
-		return Thread.currentThread().getStackTrace()[2+stackTraceOffset].getMethodName(); }
-	public static String methodName() { return methodName(1); }
-			
-	public static int lineNumber(int stackTraceOffset) { 
-		return Thread.currentThread().getStackTrace()[2+stackTraceOffset].getLineNumber(); }
-	public static int lineNumber() { return lineNumber(1); }
-
 }

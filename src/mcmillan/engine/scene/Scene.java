@@ -1,7 +1,6 @@
 package mcmillan.engine.scene;
 
-import java.awt.Color;
-
+import mcmillan.engine.debug.Profiler;
 import mcmillan.engine.ecs.Component;
 import mcmillan.engine.ecs.ECSRegistry;
 import mcmillan.engine.math.Int2;
@@ -31,23 +30,15 @@ public class Scene {
 	public Entity newEntity(String tag) { return newEntity(tag, new IntTransform()); }
 	public Entity newEntity() { return newEntity(null, new IntTransform()); }
 	
-	public void render(Int2 viewport, Int2 camera) {
+	public void render(Int2 camera) {
+		
+		Profiler.Scope scope = Profiler.startScope();
+		
 		// Pre-scene
-		{
-			// TODO: Do scene-specific background
-
-			// Draw 4x4 white rect at center of board, mostly for debugging
-			Renderer.submit(RenderCommand.setColor(Color.WHITE));
-			Renderer.submit(RenderCommand.fillRect(
-					new IntTransform(viewport.x/2-2, viewport.y/2-2, 4, 4)));
-			
-			// Center canvas at camera coords TODO: Add camera zoom
-			Renderer.submit(RenderCommand.setColor(Color.WHITE));
-			Renderer.submit(RenderCommand.drawString("Viewport: " + viewport.toString() + ", Camera: " + camera.toString(), new Int2(5, viewport.y-5))); // Draw camera position in bottom-left corner.
-			
-			// Camera translation
-			Renderer.submit(RenderCommand.centerAt(camera, viewport));
-		}
+		Int2 viewport = Renderer.viewport();
+		Renderer.submit(RenderCommand.pushTranslation(
+					-camera.x+viewport.x/2,
+					-camera.y+viewport.y/2));
 		
 		// Scene components
 		{
@@ -78,6 +69,11 @@ public class Scene {
 				Renderer.submit(RenderCommand.line(line));
 			}
 		}
+		
+		// Post-scene
+		Renderer.submit(RenderCommand.popTranslation());
+		
+		scope.stop();
 	}
 	
 	public Entity selectEntityAt(Int2 worldCoords) {

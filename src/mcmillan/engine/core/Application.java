@@ -2,6 +2,8 @@ package mcmillan.engine.core;
 
 import java.util.Iterator;
 
+import mcmillan.engine.debug.Profiler;
+import mcmillan.engine.debug.Profiler.Scope;
 import mcmillan.engine.zui.ZUILayer;
 
 public abstract class Application {
@@ -36,7 +38,7 @@ public abstract class Application {
 		cmdLineArgCount = cmdLineArgs.length;
 		
 		zuiLayer = new ZUILayer();
-		
+
 		pushOverlay(zuiLayer);
 	}
 	
@@ -51,39 +53,41 @@ public abstract class Application {
 	}
 	
 	public void close() {
-		System.err.println("CLOSE!"); // TODO: Close cleanly
-		System.exit(0);
+		running = false;
 	}
 	
 	public void run() {
 		running = true;
-		while (running) {
-			while (true) { // TODO: Make a better framerate-locked loop (LayerStack in Application?)
-				long time = System.nanoTime();
-				long delta = time - lastTime;
-				final long nspf = 1000000000 / 60;
-				if (delta > nspf) {
-					lastTime = System.nanoTime();
-					Timestep ts = new Timestep(delta);
-					
-					Iterator<Layer> layers = layerStack.ascendingIterator();
-					while (layers.hasNext()) {
-						Layer layer = layers.next();
-						layer.onUpdate(ts);
-					}
-
-					zuiLayer.begin();
-					layers = layerStack.ascendingIterator();
-					while (layers.hasNext()) {
-						Layer layer = layers.next();
-						layer.OnZUIRender(ts);
-					}
-					zuiLayer.end();
-					
-					window.postUpdate();
+		while (running) { // TODO: Make a better framerate-locked loop (LayerStack in Application?)
+			long time = System.nanoTime();
+			long delta = time - lastTime;
+			final long nspf = 1000000000 / 60;
+			if (delta > nspf) {
+				Profiler.Scope scope = Profiler.startScope();
+				lastTime = System.nanoTime();
+				Timestep ts = new Timestep(delta);
+				
+				Iterator<Layer> layers = layerStack.ascendingIterator();
+				while (layers.hasNext()) {
+					Layer layer = layers.next();
+					layer.onUpdate(ts);
 				}
+
+				zuiLayer.begin();
+				layers = layerStack.ascendingIterator();
+				while (layers.hasNext()) {
+					Layer layer = layers.next();
+					layer.onZUIRender(ts);
+				}
+				zuiLayer.end();
+				
+				window.postUpdate();
+				
+				scope.stop();
+			
 			}
 		}
+		window.close();
 	}
 	
 	
